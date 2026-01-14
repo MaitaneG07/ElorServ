@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<hibernate-configuration>
+	<session-factory>
+
+		<!-- Configuración de conexión -->
+		
+		<property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3307/eltiempo?createDatabaseIfNotExist=true </property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password"/>
+
+		<!-- Dialecto para MySQL -->
+		
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+
+		<!-- Mostrar el SQL generado -->
+		
+		<property name="show_sql">true</property>
+		<property name="format_sql">true</property>
+
+		<!-- Actualizar el esquema automáticamente -->
+		
+		<property name="hibernate.hbm2ddl.auto">update</property>
+
+		<!-- 
+			hibernate.hbm2ddl.auto puede ser:
+				create → crea la BD desde cero cada vez que arrancas la App
+						a partir de las entidades. 
+				update → actualiza las tablas, si hay cambios. 
+				none → no toca la BD nunca hagas lo que hagas. 
+		-->
+			
+		<!-- Registrar las entidades -->
+		<mapping class="ddbb.entity.CentroMet"/>
+		<mapping class="ddbb.entity.EspacioNatural"/>
+		<mapping class="ddbb.entity.MedicionCentroMet"/>
+		<mapping class="ddbb.entity.Municipio"/>
+		<mapping class="ddbb.entity.MunicipioEspacioNat"/>
+		<mapping class="ddbb.entity.Provincia"/>
+
+	</session-factory>
+</hibernate-configuration>
