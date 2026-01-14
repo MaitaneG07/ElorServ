@@ -1,4 +1,4 @@
-package modelo.entities;
+package elorServ.modelo.entities;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
