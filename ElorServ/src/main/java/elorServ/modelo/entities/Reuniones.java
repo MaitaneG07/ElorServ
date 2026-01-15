@@ -21,12 +21,12 @@ public class Reuniones implements Serializable {
     @Column(name = "estado_eus", length = 10)
     private String estadoEus;
 
-    @Column(name = "profesor_id")
+//    @Column(name = "profesor_id")
     @ManyToOne
     @JoinColumn(name = "profesor_id")
     private Users profesor;
 
-    @Column(name = "alumno_id")
+//    @Column(name = "alumno_id")
     @ManyToOne
     @JoinColumn(name = "alumno_id")
     private Users alumno;

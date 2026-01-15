@@ -42,7 +42,7 @@ public class Users implements Serializable {
     @Column(name = "telefono2", length = 20)
     private String telefono2;
 
-    @Column(name = "tipo_id", nullable = false)
+//    @Column(name = "tipo_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "tipo_id")
     private Tipos tipos;

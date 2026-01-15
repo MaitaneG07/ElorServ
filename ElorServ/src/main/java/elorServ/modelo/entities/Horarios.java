@@ -21,12 +21,12 @@ public class Horarios implements Serializable {
     @Column(name = "hora", nullable = false)
     private Integer hora;
 
-    @Column(name = "profe_id", nullable = false)
+//    @Column(name = "profe_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "profe_id")
     private Users users;
 
-    @Column(name = "modulo_id", nullable = false)
+//    @Column(name = "modulo_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "modulo_id")
     private Modulos modulos;

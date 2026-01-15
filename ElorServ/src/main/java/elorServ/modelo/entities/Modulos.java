@@ -23,7 +23,7 @@ public class Modulos implements Serializable {
     @Column(name = "horas", nullable = false)
     private Integer horas;
 
-    @Column(name = "ciclo_id", nullable = false)
+//    @Column(name = "ciclo_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "ciclo_id")
     private Ciclos ciclos;
