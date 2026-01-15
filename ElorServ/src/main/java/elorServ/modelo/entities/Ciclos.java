@@ -1,7 +1,7 @@
 package elorServ.modelo.entities;
 
-import jakarta.persistence.*;
 import java.io.Serializable;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "ciclos")

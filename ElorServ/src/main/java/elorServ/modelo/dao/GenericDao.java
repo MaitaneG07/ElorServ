@@ -16,7 +16,7 @@ public abstract  class GenericDao<T> implements DaoInterface<T> {
 	        this.entityClass = entityClass;
 	    }
 
-	public List<T> save() {
+	public List<T> selectAll() {
 		List<T> ret = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
@@ -28,7 +28,7 @@ public abstract  class GenericDao<T> implements DaoInterface<T> {
         return ret;
     }
 
-	public T findById(int id) {
+	public T selectById(int id) {
 		 T ret = null;
 	        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 	            Transaction tx = session.beginTransaction();
@@ -40,7 +40,7 @@ public abstract  class GenericDao<T> implements DaoInterface<T> {
 	        return ret;
 	    }
 
-	public void findAll(T i) {
+	public void insert(T i) {
 		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
             session.persist(i);
@@ -59,6 +59,7 @@ public abstract  class GenericDao<T> implements DaoInterface<T> {
             System.out.println("Error en update(): " + e.getMessage());
         }
     }
+	
 	public void delete(T i) {
 		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
