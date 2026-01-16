@@ -115,7 +115,12 @@
 		<artifactId>javassist</artifactId>
 		<version>3.25.0-GA</version>
 	</dependency>
-    
+
+	<dependency>
+		<groupId>ProyectoMeteorologico</groupId>
+		<artifactId>ProyectoMeteorologico</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
   </dependencies>
 
   <build>

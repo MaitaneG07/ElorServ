@@ -3,6 +3,7 @@ package elorServ;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -144,8 +145,9 @@ public class Servidor {
 
 		/**
 		 * Procesa los mensajes recibidos del cliente
+		 * @throws IOException 
 		 */
-		private void procesarMensaje(String mensaje) {
+		private void procesarMensaje(String mensaje) throws IOException {
 			if (mensaje.startsWith("LOGIN:")) {
 				procesarLogin(mensaje);
 			} else if (mensaje.startsWith("REGISTRO:")) {
@@ -161,8 +163,9 @@ public class Servidor {
 
 		/**
 		 * Procesa el login del usuario
+		 * @throws IOException 
 		 */
-		private void procesarLogin(String mensaje) {
+		private void procesarLogin(String mensaje) throws IOException {
 
 			// Formato esperado: LOGIN:usuario:password
 			String[] partes = mensaje.split(":");
@@ -181,18 +184,22 @@ public class Servidor {
 						break;
 					}
 				}
-
 				if (encontrado) {
-					salida.println("OK");
-					salida.flush();
-					System.out.println("[LOGIN EXITOSO] Usuario: " + usuario);
+
+				    salida.println("OK");
+				    salida.flush();
+					// Enviar el objeto
+		            ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
+		            salida.writeObject(usuario);
+		            System.out.println("Objeto enviado: " + usuario);
+				    salida.flush();
+				    System.out.println("[LOGIN EXITOSO] Usuario: " + usuario);
 
 				} else {
-					salida.println("ERROR");
-					salida.flush();
-					System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
+				    salida.println("ERROR");
+				    salida.flush();
+				    System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
 				}
-
 			} else {
 				salida.println("ERROR:FORMATO_INVALIDO");
 				salida.flush();
