@@ -244,7 +244,7 @@ public class Servidor {
 	public static void main(String[] args) {
 
 		SpringApplication.run(Servidor.class, args);
-		int puerto = 8081;
+		int puerto = 8080;
 
 		System.out.println("╔════════════════════════════════════╗");
 		System.out.println("║   SERVIDOR EDUCATIVO ELORRIETA    ║");
