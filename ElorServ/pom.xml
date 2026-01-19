@@ -13,8 +13,6 @@
     <version>3.2.1</version> <!-- Versión corregida -->
     <relativePath/>
   </parent>
-	
-
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
