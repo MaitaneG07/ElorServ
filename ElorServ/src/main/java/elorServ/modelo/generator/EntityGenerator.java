@@ -14,7 +14,7 @@ public class EntityGenerator {
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "";
     private static final String PACKAGE_NAME = "creacionPojos.entities";
-    private static final String OUTPUT_DIR = "C:\\Users\\in2dm3-v\\Documents\\Reto 2\\src\\main\\java\\creacionPojos\\entities\\";
+    private static final String OUTPUT_DIR = "C:\\Users\\in2dm3-v\\Documents\\RETO2 - REPOSITORIO\\ElorServ\\ElorServ\\src\\main\\java\\elorServ\\modelo\\entities\\";
     
     public static void main(String[] args) {
         EntityGenerator generator = new EntityGenerator();

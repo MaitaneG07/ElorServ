@@ -15,12 +15,12 @@ public class Matriculaciones implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "alum_id", nullable = false)
+//    @Column(name = "alum_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "alum_id")
     private Users users;
 
-    @Column(name = "ciclo_id", nullable = false)
+//    @Column(name = "ciclo_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "ciclo_id")
     private Ciclos ciclos;
