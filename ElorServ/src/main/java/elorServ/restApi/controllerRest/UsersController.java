@@ -1,4 +1,4 @@
-package elorServ.restApi.controllers;
+package elorServ.restApi.controllerRest;
 
 import java.net.URI;
 import java.util.List;
