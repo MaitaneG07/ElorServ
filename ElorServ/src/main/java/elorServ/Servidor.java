@@ -3,7 +3,6 @@ package elorServ;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,8 +12,11 @@ import java.util.List;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.google.gson.Gson;
+
 import elorServ.modelo.dao.UsersDao;
 import elorServ.modelo.entities.Users;
+import elorServ.modelo.message.Message;
 
 @SpringBootApplication
 public class Servidor {
@@ -24,6 +26,7 @@ public class Servidor {
 	private int puerto;
 	private boolean ejecutando;
 	private UsersDao usuarioDAO;
+	private Gson gson;
 
 	public Servidor() {
 		
@@ -34,6 +37,7 @@ public class Servidor {
 		this.clientesConectados = new ArrayList<>();
 		this.ejecutando = false;
 		this.usuarioDAO = new UsersDao();
+		this.gson = new Gson();
 	}
 
 	/**
@@ -120,13 +124,12 @@ public class Servidor {
 				entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				salida = new PrintWriter(socket.getOutputStream(), true);
 
-				salida.println("Bienvenido al servidor ELORRIETA");
-				salida.flush();
+				System.out.println("Bienvenido al servidor ELORRIETA");
 
-				String mensaje;
-				while ((mensaje = entrada.readLine()) != null) {
-					System.out.println("[RECIBIDO] " + mensaje);
-					procesarMensaje(mensaje);
+				String mensajeJson;
+				while ((mensajeJson = entrada.readLine()) != null) {
+					System.out.println("[RECIBIDO] " + mensajeJson);
+					procesarMensajeJson(mensajeJson);
 				}
 
 			} catch (IOException e) {
@@ -137,84 +140,84 @@ public class Servidor {
 		}
 
 		/**
-		 * Procesa los mensajes recibidos del cliente
-		 * @throws IOException 
+		 * Procesa los mensajes JSON recibidos del cliente
 		 */
-		private void procesarMensaje(String mensaje) throws IOException {
-			if (mensaje.startsWith("LOGIN:")) {
-				procesarLogin(mensaje);
-			} else if (mensaje.startsWith("REGISTRO:")) {
-//                procesarRegistro(mensaje);
-			} else {
-				System.out.println("Mensaje del cliente: " + mensaje);
-				salida.println("Servidor recibió: " + mensaje);
-				salida.flush();
+		private void procesarMensajeJson(String mensajeJson) {
+			try {
+				Message mensaje = gson.fromJson(mensajeJson, Message.class);
+				
+				System.out.println("[MENSAJE] " + mensaje.toString());
+				
+				if ("LOGIN".equals(mensaje.getTipo())) {
+					procesarLogin(mensaje);
+				} else if ("REGISTRO".equals(mensaje.getTipo())) {
+					//procesarRegistro(mensaje);
+				} else {
+					enviarRespuestaError("Tipo de mensaje desconocido");
+				}
+				
+			} catch (Exception e) {
+				System.err.println("[ERROR] Error al procesar JSON: " + e.getMessage());
+				enviarRespuestaError("Error al procesar mensaje");
 			}
 		}
 
 		/**
 		 * Procesa el login del usuario
-		 * @throws IOException 
 		 */
-		private void procesarLogin(String mensaje) throws IOException {
-			String[] partes = mensaje.split(":");
+		private void procesarLogin(Message mensaje) {
+			String usuario = mensaje.getUsuario();
+			String password = mensaje.getPassword();
 
-			if (partes.length == 3) {
-				String usuario = partes[1];
-				String password = partes[2];
+			System.out.println("[LOGIN] Intentando login para: " + usuario);
 
-				System.out.println("[LOGIN] Usuario: " + usuario);
-
+			try {
 				List<Users> usuarios = usuarioDAO.selectAll();
-	            
 				boolean encontrado = false;
+				Users usuarioEncontrado = null;
 
 				for (Users user : usuarios) {
-				    if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
-				        encontrado = true;
-				        break;
-				    }
+					if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
+						// Verificar si es profesor (tipo_id = 3)
+						if (( user).getTipos().getId() == 3) {
+							encontrado = true;
+							usuarioEncontrado = user;
+						}
+						break;
+					}
 				}
 
+				Message respuesta;
 				if (encontrado) {
-				    salida.println("OK");
-				    salida.flush();
-				    System.out.println("[LOGIN EXITOSO] Usuario: " + usuario);
+					respuesta = Message.crearRespuestaConUsuario("LOGIN_RESPONSE", "OK", "Login exitoso", usuarioEncontrado);
+					nombreUsuario = usuario;
+					System.out.println("[LOGIN EXITOSO] Profesor: " + usuario);
 				} else {
-				    salida.println("ERROR");
-				    salida.flush();
-				    System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
+					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR", "Credenciales incorrectas o no eres profesor");
+					System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
 				}
 
-
-			} else {
-				salida.println("ERROR:FORMATO_INVALIDO");
+				String respuestaJson = gson.toJson(respuesta);
+				salida.println(respuestaJson);
 				salida.flush();
+				System.out.println("[ENVIADO JSON] " + respuestaJson);
+
+			} catch (Exception e) {
+				System.err.println("[ERROR] Error en login: " + e.getMessage());
+				enviarRespuestaError("Error interno del servidor");
 			}
 		}
 
 		/**
-		 * Procesa el registro de un nuevo usuario
+		 * Envía una respuesta de error al cliente
 		 */
-//        private void procesarRegistro(String mensaje) {
-//            // Formato: REGISTRO:usuario:password:email
-//            String[] partes = mensaje.split(":");
-//           
-//            if (partes.length == 4) {
-//                String usuario = partes[1];
-//                String password = partes[2];
-//                String email = partes[3];
-//               
-//                System.out.println("[REGISTRO] Usuario: " + usuario + ", Email: " + email);
-//               
-//                // Aquí guardarías en la base de datos
-//                salida.println("REGISTRO_OK");
-//                salida.flush();
-//            } else {
-//                salida.println("ERROR:FORMATO_INVALIDO");
-//                salida.flush();
-//            }
-//        }
+		private void enviarRespuestaError(String mensajeError) {
+			Message respuesta = Message.crearRespuesta("ERROR_RESPONSE", "ERROR", mensajeError);
+			String respuestaJson = gson.toJson(respuesta);
+			salida.println(respuestaJson);
+			salida.flush();
+			System.out.println("[ENVIADO ERROR] " + respuestaJson);
+		}
 
 		/**
 		 * Cierra la conexión con el cliente
@@ -246,9 +249,9 @@ public class Servidor {
 		SpringApplication.run(Servidor.class, args);
 		int puerto = 8080;
 
-		System.out.println("╔════════════════════════════════════╗");
+		System.out.println("╔═══════════════════════════════════╗");
 		System.out.println("║   SERVIDOR EDUCATIVO ELORRIETA    ║");
-		System.out.println("╚════════════════════════════════════╝");
+		System.out.println("╚═══════════════════════════════════╝");
 
 		Servidor servidor = new Servidor(puerto);
 
