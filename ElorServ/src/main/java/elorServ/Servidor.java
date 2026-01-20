@@ -146,7 +146,7 @@ public class Servidor {
 			try {
 				Message mensaje = gson.fromJson(mensajeJson, Message.class);
 				
-				System.out.println("[MENSAJE] " + mensaje.toString());
+//				System.out.println("[MENSAJE] " + mensaje.toString());
 				
 				if ("LOGIN".equals(mensaje.getTipo())) {
 					procesarLogin(mensaje);
@@ -178,7 +178,6 @@ public class Servidor {
 
 				for (Users user : usuarios) {
 					if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
-						// Verificar si es profesor (tipo_id = 3)
 						if (( user).getTipos().getId() == 3) {
 							encontrado = true;
 							usuarioEncontrado = user;
