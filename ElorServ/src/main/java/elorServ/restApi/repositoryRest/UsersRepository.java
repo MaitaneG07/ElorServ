@@ -24,16 +24,12 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     // Buscar por nombre (ignora mayúsculas/minúsculas)
     List<Users> findByNombreContainingIgnoreCase(String nombre);
     
-    // Buscar usuarios activos
-    List<Users> findByActivoTrue();
     
     // Buscar por email y password (para login)
     Optional<Users> findByEmailAndPassword(String email, String password);
     
     // Query personalizada con JPQL
-    @Query("SELECT u FROM Usuario u WHERE u.nombre LIKE %:texto% OR u.email LIKE %:texto%")
-    List<Users> buscarPorTexto(@Param("texto") String texto);
-    
-    // Contar usuarios activos
-    long countByActivoTrue();
+//    @Query("SELECT u FROM Usuario u WHERE u.nombre LIKE %:texto% OR u.email LIKE %:texto%")
+//    List<Users> buscarPorTexto(@Param("texto") String texto);
+ 
 }

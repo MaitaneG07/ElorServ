@@ -5,6 +5,7 @@ import java.util.Optional;
 
 
 import elorServ.modelo.entities.Users;
+import elorServ.modelo.exception.ElorException;
 
 public interface InterfaceService {
     
@@ -12,7 +13,7 @@ public interface InterfaceService {
     
     Optional<Users> obtenerPorId(Long id);
     
-    Users crear(Users user);
+    Users crear(Users user) throws ElorException;
     
     Users actualizar(Long id, Users usuario);
     
@@ -22,9 +23,7 @@ public interface InterfaceService {
     
     List<Users> buscarPorNombre(String nombre);
     
-    List<Users> obtenerActivos();
-    
     boolean existeEmail(String email);
     
-    long contarUsuariosActivos();
+  
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import elorServ.modelo.entities.Users;
+import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.repositoryRest.UsersRepository;
 
 
@@ -20,26 +21,61 @@ public class UsersService implements InterfaceService {
 
 	@Override
 	public List<Users> obtenerTodos() {
-		// TODO Auto-generated method stub
-		return null;
+		return usersRepository.findAll();
 	}
 
 	@Override
 	public Optional<Users> obtenerPorId(Long id) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		return usersRepository.findById(id);
 	}
 
 	@Override
-	public Users crear(Users user) {
-		// TODO Auto-generated method stub
-		return null;
+	public Users crear(Users user) throws ElorException {
+		if (usersRepository.existsByEmail(user.getEmail())) {
+            throw new ElorException();
+	}
+		// Normalizar datos
+		user.setEmail(user.getEmail().toLowerCase().trim());
+		user.setNombre(user.getNombre().trim());
+        
+        // TODO: En producción, hashear la contraseña con BCrypt
+        // String passwordHash = passwordEncoder.encode(usuario.getPassword());
+        // usuario.setPassword(passwordHash);
+        
+        return usersRepository.save(user);
 	}
 
 	@Override
 	public Users actualizar(Long id, Users usuario) {
-		// TODO Auto-generated method stub
-		return null;
+		//quitar:
+		return usuario;
+//		return usuarioRepository.findById(id)
+//	            .map(usuario -> {
+//	                // Actualizar campos
+//	                usuario.setNombre(usuarioActualizado.getNombre().trim());
+//	                
+//	                // Solo actualizar email si cambió y no existe
+//	                if (!usuario.getEmail().equals(usuarioActualizado.getEmail())) {
+//	                    if (usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
+//	                        throw new IllegalArgumentException("El email ya está en uso");
+//	                    }
+//	                    usuario.setEmail(usuarioActualizado.getEmail().toLowerCase().trim());
+//	                }
+//	                
+//	                // Actualizar password si se proporcionó
+//	                if (usuarioActualizado.getPassword() != null && 
+//	                    !usuarioActualizado.getPassword().isEmpty()) {
+//	                    usuario.setPassword(usuarioActualizado.getPassword());
+//	                }
+//	                
+//	                if (usuarioActualizado.getActivo() != null) {
+//	                    usuario.setActivo(usuarioActualizado.getActivo());
+//	                }
+//	                
+//	                return usuarioRepository.save(usuario);
+//	            })
+//	            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + id));
+//	   
 	}
 
 	@Override
@@ -50,8 +86,11 @@ public class UsersService implements InterfaceService {
 
 	@Override
 	public Optional<Users> autenticar(String usuario, String password) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		 // TODO: En producción, comparar con BCrypt
+        return usersRepository.findByEmailAndPassword(
+            usuario.toLowerCase().trim(), 
+            password
+        );
 	}
 
 	@Override
@@ -60,21 +99,12 @@ public class UsersService implements InterfaceService {
 		return null;
 	}
 
-	@Override
-	public List<Users> obtenerActivos() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public boolean existeEmail(String email) {
-		// TODO Auto-generated method stub
-		return false;
+		return usersRepository.existsByEmail(email.toLowerCase().trim());
 	}
 
-	@Override
-	public long contarUsuariosActivos() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
 }
