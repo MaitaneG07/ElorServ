@@ -14,38 +14,28 @@ import elorServ.restApi.repositoryRest.UsersRepository;
 
 @Service
 @Transactional
-public class UsersService implements InterfaceService {
+public class UsersService {
 	
 	 @Autowired
 	    private UsersRepository usersRepository;
 
-	@Override
-	public List<Users> obtenerTodos() {
+	public List<Users> findAll() {
 		return usersRepository.findAll();
 	}
 
-	@Override
-	public Optional<Users> obtenerPorId(Long id) {
+	public Optional<Users> findById(Long id) {
 		return usersRepository.findById(id);
 	}
-
-	@Override
-	public Users crear(Users user) throws ElorException {
-		if (usersRepository.existsByEmail(user.getEmail())) {
-            throw new ElorException();
+	
+	public List<Users> buscarPorNombre(String nombre) {
+		// TODO Auto-generated method stub
+		return null;
 	}
-		// Normalizar datos
-		user.setEmail(user.getEmail().toLowerCase().trim());
-		user.setNombre(user.getNombre().trim());
-        
-        // TODO: En producción, hashear la contraseña con BCrypt
-        // String passwordHash = passwordEncoder.encode(usuario.getPassword());
-        // usuario.setPassword(passwordHash);
-        
+
+	public Users save(Users user) {
         return usersRepository.save(user);
 	}
 
-	@Override
 	public Users actualizar(Long id, Users usuario) {
 		//quitar:
 		return usuario;
@@ -78,30 +68,19 @@ public class UsersService implements InterfaceService {
 //	   
 	}
 
-	@Override
-	public void eliminar(Long id) {
+	public void deleteById(Long id) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public Optional<Users> autenticar(String usuario, String password) {
 		 // TODO: En producción, comparar con BCrypt
-        return usersRepository.findByEmailAndPassword(
+        return usersRepository.findByUserAndPassword(
             usuario.toLowerCase().trim(), 
             password
         );
 	}
 
-	@Override
-	public List<Users> buscarPorNombre(String nombre) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
-
-	@Override
 	public boolean existeEmail(String email) {
 		return usersRepository.existsByEmail(email.toLowerCase().trim());
 	}

@@ -38,7 +38,7 @@ public class UsersController {
      */
     @GetMapping
     public ResponseEntity<List<Users>> getAllUsers() {
-        List<Users> users = usersService.obtenerTodos();
+        List<Users> users = usersService.findAll();
         return ResponseEntity.ok(users);
     }
     
@@ -48,7 +48,7 @@ public class UsersController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
-        Optional<Users> user = usersService.obtenerPorId(id);
+        Optional<Users> user = usersService.findById(id);
         
         if (user.isPresent()) {
             return ResponseEntity.ok(user.get());
@@ -69,7 +69,7 @@ public class UsersController {
     @PostMapping
     public ResponseEntity<?> crear(@Valid @RequestBody Users user) throws ElorException {
         try {
-            Users usuarioCreado = usersService.crear(user);
+            Users usuarioCreado = usersService.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCreado);
         } catch (IllegalArgumentException e) {
             Map<String, String> error = new HashMap<>();
@@ -103,7 +103,7 @@ public class UsersController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
-            usersService.eliminar(id);
+            usersService.deleteById(id);
             Map<String, String> response = new HashMap<>();
             response.put("mensaje", "Users eliminado correctamente");
             return ResponseEntity.ok(response);
@@ -159,25 +159,6 @@ public class UsersController {
     }
     
     
-//  @GetMapping("/user/find/{name}")
-//  public ResponseEntity<Users> getByName1(@PathVariable String name) {
-//
-//      Users ret = null;
-//
-//      List<Users> users = usersRepository.findAll();
-//
-//      for (Users user : users) {
-//          if (user.getNombre() != null && user.getNombre().equals(name)) {
-//              ret = user;
-//              break;
-//          }
-//      }
-//
-//      return ret != null
-//              ? ResponseEntity.ok(ret)
-//              : ResponseEntity.notFound().build();
-//  }
-  
   
     
     /**

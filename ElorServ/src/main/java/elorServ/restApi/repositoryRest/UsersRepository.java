@@ -4,8 +4,6 @@ package elorServ.restApi.repositoryRest;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import elorServ.modelo.entities.Users;
@@ -26,10 +24,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     
     
     // Buscar por email y password (para login)
-    Optional<Users> findByEmailAndPassword(String email, String password);
+    Optional<Users> findByUserAndPassword(String user, String password);
     
-    // Query personalizada con JPQL
-//    @Query("SELECT u FROM Usuario u WHERE u.nombre LIKE %:texto% OR u.email LIKE %:texto%")
-//    List<Users> buscarPorTexto(@Param("texto") String texto);
  
 }
