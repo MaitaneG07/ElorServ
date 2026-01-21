@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 
 import elorServ.modelo.dao.UsersDao;
 import elorServ.modelo.entities.Users;
@@ -37,7 +41,15 @@ public class Servidor {
 		this.clientesConectados = new ArrayList<>();
 		this.ejecutando = false;
 		this.usuarioDAO = new UsersDao();
-		this.gson = new Gson();
+		// Configurar Gson con adaptadores para LocalDateTime
+        this.gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, 
+                (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> 
+                    context.serialize(src.toString()))
+            .registerTypeAdapter(LocalDateTime.class, 
+                (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
+                    LocalDateTime.parse(json.getAsString()))
+            .create();
 	}
 
 	/**
