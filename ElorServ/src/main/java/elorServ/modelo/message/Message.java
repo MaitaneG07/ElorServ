@@ -11,8 +11,10 @@ public class Message {
 	private String estado;
 	private String mensaje;
 	private Users userData;
-	private List<Users> usersList; 
-	private Integer idProfesor; 
+	private List<Users> usersList;
+	private Integer idProfesor;
+	private Integer cicloId;
+	private Integer curso;
 
 	public Message() {
 	}
@@ -33,16 +35,25 @@ public class Message {
 		msg.idProfesor = idProfesor;
 		return msg;
 	}
-	
-    // Constructor para respuestas con objeto Users (servidor -> cliente)
-    public static Message crearRespuestaConUsuario(String tipo, String estado, String mensaje, Users userData) {
-        Message msg = new Message();
-        msg.tipo = tipo;
-        msg.estado = estado;
-        msg.mensaje = mensaje;
-        msg.userData = userData;
-        return msg;
-    }
+
+	public static Message createListStudentsByProfesorAndFilters(int idProfesor, Integer cicloId, Integer curso) {
+		Message msg = new Message();
+		msg.tipo = "GET_ALUMNOS_FILTRADOS";
+		msg.idProfesor = idProfesor;
+		msg.cicloId = cicloId;
+		msg.curso = curso;
+		return msg;
+	}
+
+	// Constructor para respuestas con objeto Users (servidor -> cliente)
+	public static Message crearRespuestaConUsuario(String tipo, String estado, String mensaje, Users userData) {
+		Message msg = new Message();
+		msg.tipo = tipo;
+		msg.estado = estado;
+		msg.mensaje = mensaje;
+		msg.userData = userData;
+		return msg;
+	}
 
 	// Constructor para respuestas simples
 	public static Message crearRespuesta(String tipo, String estado, String mensaje) {
@@ -126,6 +137,22 @@ public class Message {
 
 	public void setIdProfesor(Integer idProfesor) {
 		this.idProfesor = idProfesor;
+	}
+
+	public Integer getCicloId() {
+		return cicloId;
+	}
+
+	public void setCicloId(Integer cicloId) {
+		this.cicloId = cicloId;
+	}
+
+	public Integer getCurso() {
+		return curso;
+	}
+
+	public void setCurso(Integer curso) {
+		this.curso = curso;
 	}
 
 	@Override

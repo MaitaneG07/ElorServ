@@ -166,6 +166,10 @@ public class Servidor {
 				procesarGetAllStudents(mensaje);
 				break;
 
+			case "GET_ALUMNOS_FILTRADOS":
+				procesarGetFilterStudents(mensaje);
+				break;
+
 			default:
 				System.err.println("[ERROR] Error al procesar JSON");
 				enviarRespuestaError("Error al procesar mensaje");
@@ -259,6 +263,47 @@ public class Servidor {
 				System.err.println("[ERROR] Error en la búsqueda de alumnos: " + e.getMessage());
 				e.printStackTrace();
 				enviarRespuestaError("Error interno del servidor");
+			}
+		}
+
+		/**
+		 * Procesa el mensaje para filtrar los alumnos por ciclo y curso
+		 * 
+		 * @param mensaje
+		 * @return
+		 */
+		public void procesarGetFilterStudents(Message mensaje) {
+			try {
+				Integer profesorId = mensaje.getIdProfesor();
+				Integer cicloId = mensaje.getCicloId();
+				Integer curso = mensaje.getCurso();
+
+				if (profesorId == null) {
+					respuesta = Message.crearRespuesta("GET_ALUMNOS_FILTRADOS", "ERROR",
+							"ID de profesor no proporcionado");
+				}
+
+				UsersDao usersDao = new UsersDao();
+				List<Users> alumnos = usersDao.getAlumnosByProfesorAndFilters(profesorId, cicloId, curso);
+
+				if (alumnos != null && !alumnos.isEmpty()) {
+					respuesta = Message.crearRespuestaConLista("GET_ALUMNOS_FILTRADOS", "OK",
+							"Se encontraron " + alumnos.size() + " alumnos", alumnos);
+				} else {
+					respuesta = Message.crearRespuestaConLista("GET_ALUMNOS_FILTRADOS", "OK",
+							"No se encontraron alumnos con esos filtros", new ArrayList<>());
+				}
+				
+				String respuestaJson = gson.toJson(respuesta);
+				salida.println(respuestaJson);
+				salida.flush();
+				System.out.println("[ENVIADO JSON] " + respuestaJson);
+
+			} catch (Exception e) {
+				System.err.println("Error procesando GET_ALUMNOS_FILTRADOS: " + e.getMessage());
+				e.printStackTrace();
+				respuesta = Message.crearRespuesta("GET_ALUMNOS_FILTRADOS", "ERROR",
+						"Error al obtener alumnos: " + e.getMessage());
 			}
 		}
 
