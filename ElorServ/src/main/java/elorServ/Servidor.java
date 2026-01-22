@@ -15,8 +15,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSerializer;
 import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 
 import elorServ.modelo.dao.UsersDao;
 import elorServ.modelo.entities.Users;
@@ -33,22 +33,21 @@ public class Servidor {
 	private Gson gson;
 
 	public Servidor() {
-		
+
 	}
-	
+
 	public Servidor(int puerto) {
 		this.puerto = puerto;
 		this.clientesConectados = new ArrayList<>();
 		this.ejecutando = false;
 		this.usuarioDAO = new UsersDao();
+		// Configurar Gson con adaptadores para LocalDateTime
 		this.gson = new GsonBuilder()
-			.registerTypeAdapter(LocalDateTime.class,
-				(JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
-					context.serialize(src.toString()))
-			.registerTypeAdapter(LocalDateTime.class,
-					(JsonDeserializer<LocalDateTime>) (json, typeOfT, context) ->
-						LocalDateTime.parse(json.getAsString()))
-			.create();
+				.registerTypeAdapter(LocalDateTime.class,
+						(JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> context.serialize(src.toString()))
+				.registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT,
+						context) -> LocalDateTime.parse(json.getAsString()))
+				.create();
 	}
 
 	/**
@@ -123,6 +122,7 @@ public class Servidor {
 		private PrintWriter salida;
 		private Servidor servidor;
 		private String nombreUsuario;
+		private Message respuesta;
 
 		public ManejadorCliente(Socket socket, Servidor servidor) {
 			this.socket = socket;
@@ -154,21 +154,20 @@ public class Servidor {
 		 * Procesa los mensajes JSON recibidos del cliente
 		 */
 		private void procesarMensajeJson(String mensajeJson) {
-			try {
-				Message mensaje = gson.fromJson(mensajeJson, Message.class);
-				
-				System.out.println("[MENSAJE] " + mensaje.toString());
-				
-				if ("LOGIN".equals(mensaje.getTipo())) {
-					procesarLogin(mensaje);
-				} else if ("REGISTRO".equals(mensaje.getTipo())) {
-					//procesarRegistro(mensaje);
-				} else {
-					enviarRespuestaError("Tipo de mensaje desconocido");
-				}
-				
-			} catch (Exception e) {
-				System.err.println("[ERROR] Error al procesar JSON: " + e.getMessage());
+
+			Message mensaje = gson.fromJson(mensajeJson, Message.class);
+
+			switch (mensaje.getTipo()) {
+			case "LOGIN":
+				procesarLogin(mensaje);
+				break;
+
+			case "GET_ALUMNOS_BY_PROFESOR":
+				procesarGetAllStudents(mensaje);
+				break;
+
+			default:
+				System.err.println("[ERROR] Error al procesar JSON");
 				enviarRespuestaError("Error al procesar mensaje");
 			}
 		}
@@ -189,8 +188,7 @@ public class Servidor {
 
 				for (Users user : usuarios) {
 					if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
-						// Verificar si es profesor (tipo_id = 3)
-						if (( user).getTipos().getId() == 3) {
+						if ((user).getTipos().getId() == 3) {
 							encontrado = true;
 							usuarioEncontrado = user;
 						}
@@ -198,13 +196,14 @@ public class Servidor {
 					}
 				}
 
-				Message respuesta;
 				if (encontrado) {
-					respuesta = Message.crearRespuestaConUsuario("LOGIN_RESPONSE", "OK", "Login exitoso", usuarioEncontrado);
+					respuesta = Message.crearRespuestaConUsuario("LOGIN_RESPONSE", "OK", "Login exitoso",
+							usuarioEncontrado);
 					nombreUsuario = usuario;
 					System.out.println("[LOGIN EXITOSO] Profesor: " + usuario);
 				} else {
-					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR", "Credenciales incorrectas o no eres profesor");
+					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR",
+							"Credenciales incorrectas o no eres profesor");
 					System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
 				}
 
@@ -215,6 +214,50 @@ public class Servidor {
 
 			} catch (Exception e) {
 				System.err.println("[ERROR] Error en login: " + e.getMessage());
+				enviarRespuestaError("Error interno del servidor");
+			}
+		}
+
+		/**
+		 * Procesa el mensaje para obtener y enviar la lista de alumnos
+		 * 
+		 * @param mensaje
+		 */
+		public void procesarGetAllStudents(Message mensaje) {
+			int idProfesor = mensaje.getIdProfesor();
+
+			System.out.println("[GET_ALUMNOS_BY_PROFESOR] Intentando obtener alumnos del profesor: " + idProfesor);
+
+			try {
+				List<Users> listStudents = usuarioDAO.selectAll();
+				List<Users> usuariosEncontrados = new ArrayList<>();
+
+				for (Users alumno : listStudents) {
+					if (alumno.getTipos().getId() == 4) {
+						usuariosEncontrados.add(alumno);
+					}
+				}
+
+				if (usuariosEncontrados != null && !usuariosEncontrados.isEmpty()) {
+					respuesta = Message.crearRespuestaConLista("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "OK",
+							"Se encontraron " + usuariosEncontrados.size() + " alumnos", usuariosEncontrados);
+					System.out.println("[GET ALUMNOS EXITOSO] Profesor ID: " + idProfesor + ", Alumnos encontrados: "
+							+ usuariosEncontrados.size());
+				} else {
+					respuesta = Message.crearRespuesta("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "ERROR",
+							"No se encontraron alumnos");
+					System.out
+							.println("[GET ALUMNOS FALLIDO] Profesor ID: " + idProfesor + "No se encontraron alumnos");
+				}
+
+				String respuestaJson = gson.toJson(respuesta);
+				salida.println(respuestaJson);
+				salida.flush();
+				System.out.println("[ENVIADO JSON] " + respuestaJson);
+
+			} catch (Exception e) {
+				System.err.println("[ERROR] Error en la búsqueda de alumnos: " + e.getMessage());
+				e.printStackTrace();
 				enviarRespuestaError("Error interno del servidor");
 			}
 		}
