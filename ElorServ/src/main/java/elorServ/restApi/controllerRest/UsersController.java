@@ -67,9 +67,9 @@ public class UsersController {
      * @throws ElorException 
      */
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Users user) throws ElorException {
+    public ResponseEntity<?> crear(@Valid @RequestBody Users username) throws ElorException {
         try {
-            Users usuarioCreado = usersService.save(user);
+            Users usuarioCreado = usersService.save(username);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCreado);
         } catch (IllegalArgumentException e) {
             Map<String, String> error = new HashMap<>();
@@ -85,9 +85,9 @@ public class UsersController {
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Users user) {
+            @Valid @RequestBody Users username) {
         try {
-            Users usuarioActualizado = usersService.actualizar(id, user);
+            Users usuarioActualizado = usersService.actualizar(id, username);
             return ResponseEntity.ok(usuarioActualizado);
         } catch (IllegalArgumentException e) {
             Map<String, String> error = new HashMap<>();

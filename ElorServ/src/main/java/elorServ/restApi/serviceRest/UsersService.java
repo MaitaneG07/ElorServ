@@ -32,13 +32,13 @@ public class UsersService {
 		return null;
 	}
 
-	public Users save(Users user) {
-        return usersRepository.save(user);
+	public Users save(Users username) {
+        return usersRepository.save(username);
 	}
 
-	public Users actualizar(Long id, Users usuario) {
+	public Users actualizar(Long id, Users username) {
 		//quitar:
-		return usuario;
+		return username;
 //		return usuarioRepository.findById(id)
 //	            .map(usuario -> {
 //	                // Actualizar campos
@@ -73,10 +73,10 @@ public class UsersService {
 
 	}
 
-	public Optional<Users> autenticar(String usuario, String password) {
+	public Optional<Users> autenticar(String username, String password) {
 		 // TODO: En producción, comparar con BCrypt
-        return usersRepository.findByUserAndPassword(
-            usuario.toLowerCase().trim(), 
+        return usersRepository.findByUsernameAndPassword(
+        		username.toLowerCase().trim(), 
             password
         );
 	}
