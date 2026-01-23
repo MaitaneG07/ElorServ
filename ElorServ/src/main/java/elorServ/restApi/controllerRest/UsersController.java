@@ -23,7 +23,7 @@ import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.serviceRest.UsersService;
 import jakarta.validation.Valid;
 
-
+import elorServ.restApi.dto.PerfilAlumnoDto;
 
 @RestController
 @RequestMapping("/api/users")
@@ -204,6 +204,21 @@ public class UsersController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("existe", existe);
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{id}/perfil-alumno")
+    public ResponseEntity<?> getPerfilAlumno(@PathVariable Long id) {
+
+        // Si tu service recibe Integer, convertimos:
+        Optional<PerfilAlumnoDto> dto = usersService.obtenerPerfilAlumno(id.intValue());
+
+        if (dto.isPresent()) {
+            return ResponseEntity.ok(dto.get());
+        } else {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Perfil alumno no encontrado (¿no tiene matrícula?)");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
     }
 }
 
