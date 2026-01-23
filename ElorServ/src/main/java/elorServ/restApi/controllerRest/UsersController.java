@@ -139,7 +139,7 @@ public class UsersController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
         // 1. Intentamos obtener "email" o "username" para ser flexibles
-        String usuario = credenciales.get("email");
+        String usuario = credenciales.get("username");
         if (usuario == null) {
             usuario = credenciales.get("username");
         }
@@ -149,7 +149,7 @@ public class UsersController {
         // 2. VALIDACIÓN DE SEGURIDAD (Esto evita el NullPointerException)
         if (usuario == null || password == null) {
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Faltan datos: se requiere 'email' (o 'username') y 'password'");
+            error.put("error", "Faltan datos: se requiere 'username') y 'password'");
             // Imprimimos para ver qué claves llegaron realmente
             System.out.println("Claves recibidas: " + credenciales.keySet()); 
             return ResponseEntity.badRequest().body(error);
