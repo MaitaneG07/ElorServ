@@ -118,12 +118,45 @@ public class UsersController {
      * POST /api/users/login
      * Autenticar user
      */
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+//        String username = credenciales.get("username");
+//        String password = credenciales.get("password");
+//        
+//        Optional<Users> user = usersService.autenticar(username, password);
+//        
+//        if (user.isPresent()) {
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("mensaje", "Login exitoso");
+//            response.put("user", user.get());
+//            return ResponseEntity.ok(response);
+//        } else {
+//            Map<String, String> error = new HashMap<>();
+//            error.put("error", "Credenciales inválidas");
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+//        }
+//    }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
-        String email = credenciales.get("email");
+        // 1. Intentamos obtener "email" o "username" para ser flexibles
+        String usuario = credenciales.get("email");
+        if (usuario == null) {
+            usuario = credenciales.get("username");
+        }
+
         String password = credenciales.get("password");
         
-        Optional<Users> user = usersService.autenticar(email, password);
+        // 2. VALIDACIÓN DE SEGURIDAD (Esto evita el NullPointerException)
+        if (usuario == null || password == null) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Faltan datos: se requiere 'email' (o 'username') y 'password'");
+            // Imprimimos para ver qué claves llegaron realmente
+            System.out.println("Claves recibidas: " + credenciales.keySet()); 
+            return ResponseEntity.badRequest().body(error);
+        }
+        
+        // 3. Llamamos al servicio con el dato seguro
+        Optional<Users> user = usersService.autenticar(usuario, password);
         
         if (user.isPresent()) {
             Map<String, Object> response = new HashMap<>();
