@@ -18,7 +18,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 
+import elorServ.modelo.dao.HorariosDao;
 import elorServ.modelo.dao.UsersDao;
+import elorServ.modelo.entities.Horarios;
 import elorServ.modelo.entities.Users;
 import elorServ.modelo.message.Message;
 
@@ -154,26 +156,46 @@ public class Servidor {
 		 * Procesa los mensajes JSON recibidos del cliente
 		 */
 		private void procesarMensajeJson(String mensajeJson) {
+		    try {
+		        Message mensaje = gson.fromJson(mensajeJson, Message.class);
+		        
+		        System.out.println("[DEBUG] Tipo recibido: '" + mensaje.getTipo() + "'");
+		        
+		        if (mensaje.getTipo() == null) {
+		            System.err.println("[ERROR] Tipo de mensaje es null");
+		            enviarRespuestaError("Tipo de mensaje inválido");
+		            return;
+		        }
+		        
+		        String tipo = mensaje.getTipo().trim();
+		        
+		        switch (tipo) {
+		            case "LOGIN":
+		                procesarLogin(mensaje);
+		                break;
 
-			Message mensaje = gson.fromJson(mensajeJson, Message.class);
+		            case "GET_ALUMNOS_BY_PROFESOR":
+		                procesarGetAllStudents(mensaje);
+		                break;
 
-			switch (mensaje.getTipo()) {
-			case "LOGIN":
-				procesarLogin(mensaje);
-				break;
+		            case "GET_ALUMNOS_FILTRADOS":
+		                procesarGetFilterStudents(mensaje);
+		                break;
+		                
+		            case "GET_HORARIO_PROFESOR":
+		                procesarHorario(mensaje);
+		                break;
 
-			case "GET_ALUMNOS_BY_PROFESOR":
-				procesarGetAllStudents(mensaje);
-				break;
-
-			case "GET_ALUMNOS_FILTRADOS":
-				procesarGetFilterStudents(mensaje);
-				break;
-
-			default:
-				System.err.println("[ERROR] Error al procesar JSON");
-				enviarRespuestaError("Error al procesar mensaje");
-			}
+		            default:
+		                System.err.println("[ERROR] Tipo no reconocido: '" + tipo + "'");
+		                enviarRespuestaError("Tipo de mensaje desconocido: " + tipo);
+		        }
+		        
+		    } catch (Exception e) {
+		        System.err.println("[ERROR] Excepción al procesar JSON: " + e.getMessage());
+		        e.printStackTrace();
+		        enviarRespuestaError("Error al procesar mensaje");
+		    }
 		}
 
 		/**
@@ -305,6 +327,50 @@ public class Servidor {
 				respuesta = Message.crearRespuesta("GET_ALUMNOS_FILTRADOS", "ERROR",
 						"Error al obtener alumnos: " + e.getMessage());
 			}
+		}
+		
+		public void procesarHorario(Message mensaje) {
+		    try {
+		        System.out.println("[SERVER] INICIO procesarHorario");
+		        
+		        int idProfesor = mensaje.getIdProfesor();
+		        System.out.println("[SERVER] ID Profesor: " + idProfesor);
+		        
+		        HorariosDao horarioDao = new HorariosDao();
+		        List<Horarios> listHorarios = horarioDao.selectHorarioByProfesorId(idProfesor);
+		        
+		        System.out.println("[SERVER] Lista recibida del DAO: " + (listHorarios != null ? listHorarios.size() : "null"));
+		        
+		        if (listHorarios != null && !listHorarios.isEmpty()) {
+		            System.out.println("[SERVER] Creando respuesta con " + listHorarios.size() + " horarios");
+		            respuesta = Message.crearRespuestaConListaHorarios(
+		                "GET_HORARIOS_PROFESOR_RESPONSE", 
+		                "OK",
+		                "Horario obtenido", 
+		                listHorarios
+		            );
+		        } else {
+		            System.out.println("[SERVER] Sin horarios, enviando lista vacía");
+		            respuesta = Message.crearRespuestaConListaHorarios(
+		                "GET_HORARIOS_PROFESOR_RESPONSE", 
+		                "OK",
+		                "Sin horarios", 
+		                new ArrayList<>()
+		            );
+		        }
+		        
+		        String respuestaJson = gson.toJson(respuesta);
+		        System.out.println("[SERVER] JSON a enviar (primeros 200 chars): " + respuestaJson.substring(0, Math.min(200, respuestaJson.length())));
+		        
+		        salida.println(respuestaJson);
+		        salida.flush();
+		        System.out.println("[SERVER] Respuesta enviada");
+		        
+		    } catch (Exception e) {
+		        System.err.println("[SERVER ERROR] " + e.getMessage());
+		        e.printStackTrace();
+		        enviarRespuestaError("Error al obtener horarios");
+		    }
 		}
 
 		/**

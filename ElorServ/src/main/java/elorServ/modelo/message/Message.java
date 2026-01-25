@@ -2,7 +2,9 @@ package elorServ.modelo.message;
 
 import java.util.List;
 
+import elorServ.modelo.entities.Horarios;
 import elorServ.modelo.entities.Users;
+
 
 public class Message {
 	private String tipo;
@@ -12,6 +14,7 @@ public class Message {
 	private String mensaje;
 	private Users userData;
 	private List<Users> usersList;
+	private List<Horarios> horarioList;
 	private Integer idProfesor;
 	private Integer cicloId;
 	private Integer curso;
@@ -73,7 +76,24 @@ public class Message {
 		msg.usersList = usersList;
 		return msg;
 	}
-
+	
+	public static Message crearRespuestaConListaHorarios(String tipo, String estado, String mensaje,
+			List<Horarios> listHorarios) {
+		Message msg = new Message();
+		msg.tipo = tipo;
+		msg.estado = estado;
+		msg.mensaje = mensaje;
+		msg.horarioList = listHorarios;
+		return msg;
+	}
+	
+	public static Message createHorario(Integer idProfesor) {
+		Message msg = new Message();
+		msg.tipo = "GET_HORARIO_PROFESOR";
+		msg.idProfesor = idProfesor;
+		return msg;
+	}
+	
 	// Getters y Setters
 	public String getTipo() {
 		return tipo;
@@ -127,6 +147,14 @@ public class Message {
 		return usersList;
 	}
 
+	public void setHorarioList(List<Horarios> horarioList) {
+		this.horarioList = horarioList;
+	}
+	
+	public List<Horarios> getHorarioList() {
+		return horarioList;
+	}
+	
 	public void setUsersList(List<Users> usersList) {
 		this.usersList = usersList;
 	}
