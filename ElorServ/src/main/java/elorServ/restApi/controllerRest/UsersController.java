@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import elorServ.modelo.entities.Users;
 import elorServ.modelo.exception.ElorException;
@@ -218,6 +219,27 @@ public class UsersController {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Perfil alumno no encontrado (¿no tiene matrícula?)");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+    }
+    
+    @PostMapping("/{id}/foto")
+    public ResponseEntity<?> subirFoto(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            Users u = usersService.subirFotoPerfil(id, file);
+
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("mensaje", "Foto subida");
+            resp.put("argazkiaUrl", u.getArgazkiaUrl());
+            resp.put("user", u);
+            return ResponseEntity.ok(resp);
+
+        } catch (Exception e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
         }
     }
 }

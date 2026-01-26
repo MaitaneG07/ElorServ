@@ -16,6 +16,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.sql.Date;
+import java.nio.file.*;
+import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -146,4 +149,31 @@ public class UsersService {
 	    return Optional.of(dto);
 	}
 	
+	public Users subirFotoPerfil(Long userId, MultipartFile file) throws Exception {
+	    Users u = usersRepository.findById(userId)
+	            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+	    if (file == null || file.isEmpty()) {
+	        throw new IllegalArgumentException("Archivo vacío");
+	    }
+
+	    Path uploadDir = Paths.get("uploads", "users");
+	    Files.createDirectories(uploadDir);
+
+	    String original = file.getOriginalFilename();
+	    String ext = "";
+	    if (original != null && original.contains(".")) {
+	        ext = original.substring(original.lastIndexOf("."));
+	    }
+
+	    String filename = "user_" + userId + "_" + UUID.randomUUID() + ext;
+	    Path target = uploadDir.resolve(filename);
+
+	    Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+	    String urlPublica = "/uploads/users/" + filename;
+
+	    u.setArgazkiaUrl(urlPublica);
+	    return usersRepository.save(u);
+	}
 }
