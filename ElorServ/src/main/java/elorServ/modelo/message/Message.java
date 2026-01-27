@@ -47,16 +47,6 @@ public class Message {
 		return msg;
 	}
 
-	// Método para solicitar lista de alumnos filtrados
-	public static Message createListStudentsByProfesorAndFilters(int idProfesor, Integer cicloId, Integer curso) {
-		Message msg = new Message();
-		msg.tipo = "GET_ALUMNOS_FILTRADOS";
-		msg.idProfesor = idProfesor;
-		msg.cicloId = cicloId;
-		msg.curso = curso;
-		return msg;
-	}
-
 	// Método para solicitar lista de profesores filtrados
 	public static Message createListTeachersByFilters(Integer cicloId, Integer curso) {
 		Message msg = new Message();
@@ -79,6 +69,15 @@ public class Message {
 		Message msg = new Message();
 		msg.setTipo("GET_REUNIONES_PROFESOR");
 		msg.setIdProfesor(idProfesor);
+		return msg;
+	}
+
+	public static Message createListStudentsByProfesorAndFilters(int idProfesor, Integer cicloId, Integer curso) {
+		Message msg = new Message();
+		msg.tipo = "GET_ALUMNOS_FILTRADOS";
+		msg.idProfesor = idProfesor;
+		msg.cicloId = cicloId;
+		msg.curso = curso;
 		return msg;
 	}
 
@@ -111,7 +110,6 @@ public class Message {
 		return msg;
 	}
 
-	// Constructor para respuestas con lista de horarios
 	public static Message crearRespuestaConListaHorarios(String tipo, String estado, String mensaje,
 			List<Horarios> listHorarios) {
 		Message msg = new Message();
@@ -121,8 +119,7 @@ public class Message {
 		msg.horarioList = listHorarios;
 		return msg;
 	}
-
-	// Constructor para respuestas con lista de reuniones
+	
 	public static Message crearRespuestaConListaReuniones(String tipo, String estado, String mensaje,
 			List<Reuniones> listReuniones) {
 		Message msg = new Message();
@@ -141,13 +138,13 @@ public class Message {
 	public void setTipo(String tipo) {
 		this.tipo = tipo;
 	}
-
+	
 	public List<Reuniones> getReunionesList() {
-		return reunionesList;
+	    return reunionesList;
 	}
 
 	public void setReunionesList(List<Reuniones> reunionesList) {
-		this.reunionesList = reunionesList;
+	    this.reunionesList = reunionesList;
 	}
 
 	public String getUsuario() {

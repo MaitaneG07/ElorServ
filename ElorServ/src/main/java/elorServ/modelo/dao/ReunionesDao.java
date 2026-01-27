@@ -16,33 +16,37 @@ public class ReunionesDao extends GenericDao<Reuniones> {
 	}
 
 	/**
-	 * Obtiene TODAS las reuniones de un profesor
-	 * Método más simple y confiable
-	 */
-	public List<Reuniones> selectReunionesByProfesorId(int profesorId) {
-		List<Reuniones> reuniones = null;
-
-		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-			Transaction tx = session.beginTransaction();
-
-			System.out.println("[DAO] Buscando todas las reuniones del profesor ID: " + profesorId);
-
-			String hql = "FROM Reuniones r " + "LEFT JOIN FETCH r.alumno " + "LEFT JOIN FETCH r.profesor "
-					+ "WHERE r.profesor.id = :profesorId " + "ORDER BY r.fecha";
-
-			Query<Reuniones> query = session.createQuery(hql, Reuniones.class);
-			query.setParameter("profesorId", profesorId);
-
-			reuniones = query.list();
-			tx.commit();
-
-			System.out.println("[DAO] Reuniones encontradas: " + (reuniones != null ? reuniones.size() : 0));
-
-		} catch (Exception e) {
-			System.out.println("[DAO ERROR] Error en selectReunionesByProfesorId: " + e.getMessage());
-			e.printStackTrace();
-		}
-
-		return reuniones;
-	}
+     * Obtiene TODAS las reuniones de un profesor (sin filtrar por ciclo/curso)
+     * Método más simple y confiable
+     */
+    public List<Reuniones> selectReunionesByProfesorId(int profesorId) {
+        List<Reuniones> reuniones = null;
+        
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            
+            System.out.println("[DAO] Buscando todas las reuniones del profesor ID: " + profesorId);
+            
+            String hql = "FROM Reuniones r " +
+                        "LEFT JOIN FETCH r.alumno " +
+                        "LEFT JOIN FETCH r.profesor " +
+                        "WHERE r.profesor.id = :profesorId " +
+                        "ORDER BY r.fecha";
+            
+            Query<Reuniones> query = session.createQuery(hql, Reuniones.class);
+            query.setParameter("profesorId", profesorId);
+            
+            reuniones = query.list();
+            tx.commit();
+            
+            System.out.println("[DAO] Reuniones encontradas: " + 
+                              (reuniones != null ? reuniones.size() : 0));
+            
+        } catch (Exception e) {
+            System.out.println("[DAO ERROR] Error en selectReunionesByProfesorId: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return reuniones;
+    }
 }

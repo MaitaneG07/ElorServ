@@ -348,7 +348,7 @@ public class Servidor {
 		 * Procesa el mensaje para filtrar los alumnos por ciclo y curso
 		 * 
 		 * @param mensaje
-		 * @return
+		 * @return lista de estudiantes
 		 */
 		public void procesarGetFilterStudents(Message mensaje) {
 			try {
@@ -468,6 +468,10 @@ public class Servidor {
 		    }
 		}
 		
+		/**
+		 * Procesa el mensaje para obtener las reuniones de un profesor
+		 * @param mensaje
+		 */
 		public void procesarGetReuniones(Message mensaje) {
 		    try {
 		        System.out.println("[PROCESANDO REUNIONES] Inicio");
