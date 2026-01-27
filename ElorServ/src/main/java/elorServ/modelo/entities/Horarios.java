@@ -24,7 +24,7 @@ public class Horarios implements Serializable {
 //    @Column(name = "profe_id", nullable = false)
     @ManyToOne
     @JoinColumn(name = "profe_id")
-    private Users users;
+    private Users profesor;
 
 //    @Column(name = "modulo_id", nullable = false)
     @ManyToOne
@@ -113,11 +113,11 @@ public class Horarios implements Serializable {
     }
 
     public Users getUsers() {
-        return users;
+        return profesor;
     }
 
-    public void setUsers(Users users) {
-        this.users = users;
+    public void setUsers(Users profesor) {
+        this.profesor = profesor;
     }
 
 }
