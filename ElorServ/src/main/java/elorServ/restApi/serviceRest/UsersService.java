@@ -8,17 +8,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import elorServ.modelo.entities.Users;
-import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.repositoryRest.UsersRepository;
 
 
 @Service
 @Transactional
-public class UsersService {
+public class UsersService implements InterfaceService<Users>{
 	
 	 @Autowired
 	    private UsersRepository usersRepository;
 
+	 @Override
 	public List<Users> findAll() {
 		return usersRepository.findAll();
 	}
@@ -32,44 +32,19 @@ public class UsersService {
 		return null;
 	}
 
+	@Override
 	public Users save(Users username) {
         return usersRepository.save(username);
 	}
 
+	@Override
 	public Users actualizar(Long id, Users username) {
-		//quitar:
 		return username;
-//		return usuarioRepository.findById(id)
-//	            .map(usuario -> {
-//	                // Actualizar campos
-//	                usuario.setNombre(usuarioActualizado.getNombre().trim());
-//	                
-//	                // Solo actualizar email si cambió y no existe
-//	                if (!usuario.getEmail().equals(usuarioActualizado.getEmail())) {
-//	                    if (usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
-//	                        throw new IllegalArgumentException("El email ya está en uso");
-//	                    }
-//	                    usuario.setEmail(usuarioActualizado.getEmail().toLowerCase().trim());
-//	                }
-//	                
-//	                // Actualizar password si se proporcionó
-//	                if (usuarioActualizado.getPassword() != null && 
-//	                    !usuarioActualizado.getPassword().isEmpty()) {
-//	                    usuario.setPassword(usuarioActualizado.getPassword());
-//	                }
-//	                
-//	                if (usuarioActualizado.getActivo() != null) {
-//	                    usuario.setActivo(usuarioActualizado.getActivo());
-//	                }
-//	                
-//	                return usuarioRepository.save(usuario);
-//	            })
-//	            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + id));
-//	   
 	}
 
+	@Override
 	public void deleteById(Long id) {
-		// TODO Auto-generated method stub
+		 usersRepository.deleteById(id);
 
 	}
 

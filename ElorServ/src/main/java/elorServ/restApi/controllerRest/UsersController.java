@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
 public class UsersController {
     
     @Autowired
@@ -85,9 +87,9 @@ public class UsersController {
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Users username) {
+            @Valid @RequestBody Users user) {
         try {
-            Users usuarioActualizado = usersService.actualizar(id, username);
+            Users usuarioActualizado = usersService.actualizar(id, user);
             return ResponseEntity.ok(usuarioActualizado);
         } catch (IllegalArgumentException e) {
             Map<String, String> error = new HashMap<>();
@@ -114,16 +116,28 @@ public class UsersController {
         }
     }
     
-    /**
-     * POST /api/users/login
-     * Autenticar user
-     */
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
-        String email = credenciales.get("email");
+        // 1. Intentamos obtener "email" o "username" para ser flexibles
+        String usuario = credenciales.get("username");
+        if (usuario == null) {
+            usuario = credenciales.get("username");
+        }
+
         String password = credenciales.get("password");
         
-        Optional<Users> user = usersService.autenticar(email, password);
+        // 2. VALIDACIÓN DE SEGURIDAD (Esto evita el NullPointerException)
+        if (usuario == null || password == null) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Faltan datos: se requiere 'username') y 'password'");
+            // Imprimimos para ver qué claves llegaron realmente
+            System.out.println("Claves recibidas: " + credenciales.keySet()); 
+            return ResponseEntity.badRequest().body(error);
+        }
+        
+        // 3. Llamamos al servicio con el dato seguro
+        Optional<Users> user = usersService.autenticar(usuario, password);
         
         if (user.isPresent()) {
             Map<String, Object> response = new HashMap<>();
