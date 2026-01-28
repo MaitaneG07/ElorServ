@@ -183,7 +183,6 @@ public class UsersController {
             // y no tenga que esperar a que se envíe el correo (que tarda unos segundos).
             new Thread(() -> {
                 try {
-                    // Llamamos al método que creamos antes pasando el ID
                     emailService.enviarCorreoFijo(usuarioLogueado.getUsername());
                 } catch (Exception e) {
                     System.err.println("Error enviando email tras login: " + e.getMessage());

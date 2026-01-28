@@ -21,6 +21,7 @@ import com.google.gson.JsonSerializer;
 import elorServ.modelo.dao.HorariosDao;
 import elorServ.modelo.dao.ReunionesDao;
 import elorServ.modelo.dao.UsersDao;
+import elorServ.modelo.email.EmailES;
 import elorServ.modelo.entities.Horarios;
 import elorServ.modelo.entities.Reuniones;
 import elorServ.modelo.entities.Users;
@@ -35,6 +36,7 @@ public class Servidor {
 	private boolean ejecutando;
 	private UsersDao usuarioDAO;
 	private Gson gson;
+	private EmailES emailES;
 
 	public Servidor() {
 
@@ -68,6 +70,7 @@ public class Servidor {
 			System.out.println("====================================");
 
 			while (ejecutando) {
+				Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 				try {
 					Socket clienteSocket = serverSocket.accept();
 					System.out.println("\n[NUEVA CONEXIÓN] Cliente conectado desde: "
@@ -241,6 +244,33 @@ public class Servidor {
 							usuarioEncontrado);
 					nombreUsuario = usuario;
 					System.out.println("[LOGIN EXITOSO] Profesor: " + usuario);
+					
+					// -----------------------------------------------------------
+		            // INICIO INTEGRACIÓN CORREO
+		            // -----------------------------------------------------------
+		            // Guardamos una referencia final para usarla dentro del hilo
+		            final Users userParaCorreo = usuarioEncontrado;
+		            
+		            // Lanzamos un hilo paralelo para no frenar la respuesta al cliente
+		            new Thread(() -> {
+		                try {
+		                    // Asegúrate de que tu clase Users tenga el método getEmail()
+		                    String emailDestino = userParaCorreo.getEmail(); 
+		                    String nombreUser = userParaCorreo.getUsername();
+		                    
+		                    if (emailDestino != null && !emailDestino.isEmpty()) {
+		                        emailES = new EmailES();
+		                        emailES.enviarCorreoLogin(emailDestino, nombreUser);
+		                    } else {
+		                        System.err.println("[EMAIL WARN] El usuario " + nombreUser + " no tiene email configurado.");
+		                    }
+		                } catch (Exception e) {
+		                    System.err.println("[EMAIL ERROR] No se pudo enviar el correo: " + e.getMessage());
+		                }
+		            }).start();
+		            // -----------------------------------------------------------
+		            // FIN INTEGRACIÓN CORREO
+		            // -----------------------------------------------------------
 				} else {
 					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR",
 							"Credenciales incorrectas o no eres profesor");
