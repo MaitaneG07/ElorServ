@@ -56,7 +56,7 @@ public class ReunionesDao extends GenericDao<Reuniones> {
      * @param nuevoEstado Nuevo estado de la reunión (pendiente, aceptada, denegada, conflicto)
      * @return true si se actualizó correctamente, false en caso contrario
      */
-    @SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")
 	public boolean actualizarEstadoReunion(int idReunion, String nuevoEstado) {
         Transaction tx = null;
         
@@ -99,4 +99,38 @@ public class ReunionesDao extends GenericDao<Reuniones> {
         }
     }
 
+	/**
+	 * Inserta una nueva reunión en la base de datos
+	 * @param reunion reunión a insertar
+	 * @return true si se insertó correctamente, false en caso contrario
+	 */
+	public boolean insertarReunion(Reuniones reunion) {
+	    Transaction tx = null;
+
+	    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+	        tx = session.beginTransaction();
+
+	        System.out.println("[DAO] Insertando nueva reunión");
+
+	        session.persist(reunion);
+
+	        tx.commit();
+
+	        System.out.println("[DAO] Reunión insertada correctamente");
+	        return true;
+
+	    } catch (Exception e) {
+	        System.out.println("[DAO ERROR] Error al insertar reunión: " + e.getMessage());
+	        e.printStackTrace();
+
+	        if (tx != null) {
+	            try {
+	                tx.rollback();
+	            } catch (Exception ex) {
+	                System.out.println("[DAO ERROR] Error en rollback: " + ex.getMessage());
+	            }
+	        }
+	        return false;
+	    }
+	}
 }

@@ -205,7 +205,7 @@ public class Servidor {
 		                break;
 
 		            case "GET_ALUMNOS_BY_PROFESOR":
-		                procesarGetAllStudents(mensaje);
+		            	procesarGetAllStudentsById(mensaje);
 		                break;
 
 		            case "GET_ALUMNOS_FILTRADOS":
@@ -231,7 +231,15 @@ public class Servidor {
 		            case "ACTUALIZAR_REUNION":
 		                procesarActualizarReunion(mensaje);
 		                break;
-
+		                
+		            case "GET_STUDENTS":
+		                procesarGetAllStudents(mensaje);
+		                break;
+		                
+		            case "CREAR_REUNION":
+		                procesarCreateReunion(mensaje);
+		                break;
+		                
 		            default:
 		                System.err.println("[ERROR] Tipo no reconocido: '" + tipo + "'");
 		                enviarRespuestaError("Tipo de mensaje desconocido: " + tipo);
@@ -309,7 +317,7 @@ public class Servidor {
 		 * 
 		 * @param mensaje
 		 */
-		public void procesarGetAllStudents(Message mensaje) {
+		public void procesarGetAllStudentsById(Message mensaje) {
 			int idProfesor = mensaje.getIdProfesor();
 
 			System.out.println("[GET_ALUMNOS_BY_PROFESOR] Intentando obtener alumnos del profesor: " + idProfesor);
@@ -376,6 +384,48 @@ public class Servidor {
 							"No se encontraron alumnos");
 					System.out
 					.println("[GET PROFESORES FALLIDO] No se encontraron profesores");
+				}
+				
+				String respuestaJson = gson.toJson(respuesta);
+				salida.println(respuestaJson);
+				salida.flush();
+				System.out.println("[ENVIADO JSON] " + respuestaJson);
+				
+			} catch (Exception e) {
+				System.err.println("[ERROR] Error en la búsqueda de profesores: " + e.getMessage());
+				e.printStackTrace();
+				enviarRespuestaError("Error interno del servidor");
+			}
+		}
+		
+		/**
+		 * Procesa el mensaje para obtener y enviar la lista de profesores
+		 * 
+		 * @param mensaje
+		 */
+		public void procesarGetAllStudents(Message mensaje) {
+			System.out.println("[GET_STUDENTS] Intentando obtener alumnos");
+			
+			try {
+				List<Users> listStudents = usuarioDAO.selectAll();
+				List<Users> alumnosEncontrados = new ArrayList<>();
+				
+				for (Users student : listStudents) {
+					if (student.getTipos().getId() == 4) {
+						alumnosEncontrados.add(student);
+					}
+				}
+				
+				if (alumnosEncontrados != null && !alumnosEncontrados.isEmpty()) {
+					respuesta = Message.crearRespuestaConLista("GET_STUDENTS_RESPONSE", "OK",
+							"Se encontraron " + alumnosEncontrados.size() + " alumnos", alumnosEncontrados);
+					System.out.println("[GET STUDENTS EXITOSO] Alumnos encontrados: "
+							+ alumnosEncontrados.size());
+				} else {
+					respuesta = Message.crearRespuesta("GET_STUDENTS_RESPONSE", "ERROR",
+							"No se encontraron alumnos");
+					System.out
+					.println("[GET STUDENTS FALLIDO] No se encontraron alumnos");
 				}
 				
 				String respuestaJson = gson.toJson(respuesta);
@@ -610,6 +660,93 @@ public class Servidor {
 		        enviarRespuestaError("Error interno del servidor al actualizar reunión");
 		    }
 		}
+		
+		/**
+		 * Procesa el mensaje para crear una reunion
+		 * @param mensaje
+		 */
+		public void procesarCreateReunion(Message mensaje) {
+		    try {
+		        System.out.println("[CREAR_REUNION] Inicio del proceso");
+
+		        String estado = mensaje.getEstado();
+		        String titulo = mensaje.getTitulo();
+		        String asunto = mensaje.getAsunto();
+		        String aula = mensaje.getAula();
+		        Integer idAlumno = mensaje.getIdAlumnoSeleccionado();
+		        Integer idProfesor = mensaje.getIdProfesor();
+		        LocalDateTime fechaHora = mensaje.getFechaHora();
+		        Integer idCentro = 15112;
+
+		        if (estado == null || titulo == null || aula == null ||
+		            idAlumno == null || idProfesor == null || fechaHora == null) {
+
+		            System.err.println("[CREAR_REUNION ERROR] Datos incompletos");
+		            respuesta = Message.crearRespuesta(
+		                    "CREAR_REUNION_RESPONSE",
+		                    "ERROR",
+		                    "Datos incompletos para crear la reunión"
+		            );
+		            salida.println(gson.toJson(respuesta));
+		            salida.flush();
+		            return;
+		        }
+
+		        if (fechaHora.isBefore(LocalDateTime.now())) {
+		            System.err.println("[CREAR_REUNION ERROR] Fecha en el pasado: " + fechaHora);
+		            respuesta = Message.crearRespuesta(
+		                    "CREAR_REUNION_RESPONSE",
+		                    "ERROR",
+		                    "La fecha y hora de la reunión no pueden ser en el pasado"
+		            );
+		            salida.println(gson.toJson(respuesta));
+		            salida.flush();
+		            return;
+		        }
+
+		        Reuniones reunion = new Reuniones(
+		                estado,
+		                titulo,
+		                asunto,
+		                aula,
+		                idAlumno,
+		                idProfesor,
+		                fechaHora,
+		                idCentro
+		        );
+
+		        ReunionesDao reunionesDao = new ReunionesDao();
+		        boolean insertado = reunionesDao.insertarReunion(reunion);
+
+		        if (insertado) {
+		            System.out.println("[CREAR_REUNION OK] Reunión creada correctamente");
+
+		            respuesta = Message.crearRespuesta(
+		                    "CREAR_REUNION_RESPONSE",
+		                    "OK",
+		                    "Reunión creada correctamente"
+		            );
+		        } else {
+		            System.err.println("[CREAR_REUNION ERROR] Error al insertar en BD");
+
+		            respuesta = Message.crearRespuesta(
+		                    "CREAR_REUNION_RESPONSE",
+		                    "ERROR",
+		                    "No se pudo crear la reunión"
+		            );
+		        }
+
+		        String respuestaJson = gson.toJson(respuesta);
+		        salida.println(respuestaJson);
+		        salida.flush();
+
+		    } catch (Exception e) {
+		        System.err.println("[CREAR_REUNION ERROR] Excepción: " + e.getMessage());
+		        e.printStackTrace();
+		        enviarRespuestaError("Error interno al crear la reunión");
+		    }
+		}
+
 
 		/**
 		 * Envía una respuesta de error al cliente

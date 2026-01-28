@@ -1,5 +1,6 @@
 package elorServ.modelo.message;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import elorServ.modelo.entities.Horarios;
@@ -20,6 +21,11 @@ public class Message {
 	private Integer idProfesor;
 	private Integer cicloId;
 	private Integer curso;
+	private String titulo;
+	private String asunto;
+	private String aula;
+	private Integer idAlumnoSeleccionado;
+	private LocalDateTime fechaHora;
 
 	public Message() {
 	}
@@ -57,6 +63,16 @@ public class Message {
 	public static Message createListTeachers() {
 		Message msg = new Message();
 		msg.tipo = "GET_PROFESORES";
+		return msg;
+	}
+	
+	/**
+	 * Método para solicitar lista de alumnos
+	 * @return mensaje
+	 */
+	public static Message createListStudents() {
+		Message msg = new Message();
+		msg.tipo = "GET_STUDENTS";
 		return msg;
 	}
 
@@ -124,6 +140,25 @@ public class Message {
 		Message msg = new Message();
 		msg.tipo = "ACTUALIZAR_REUNION";
 		msg.reunion = reunion;
+		return msg;
+	}
+	
+	// Método para actualizar una reunión
+	/**
+	 * Método para actualizar una reunión
+	 * @param reunion
+	 * @return mensaje
+	 */
+	public static Message createReunion(String estado, String titulo, String asunto, String aula, Integer idAlumnoSeleccionado, LocalDateTime fechaHora, Integer idProfesor) {
+		Message msg = new Message();
+		msg.tipo = "CREAR_REUNION";
+		msg.estado = estado;
+		msg.titulo = titulo;
+		msg.asunto = asunto;
+		msg.aula = aula;
+		msg.idAlumnoSeleccionado = idAlumnoSeleccionado;
+		msg.fechaHora = fechaHora;
+		msg.idProfesor = idProfesor;
 		return msg;
 	}
 
@@ -331,6 +366,46 @@ public class Message {
 
 	public void setCurso(Integer curso) {
 		this.curso = curso;
+	}
+
+	public String getTitulo() {
+		return titulo;
+	}
+
+	public void setTitulo(String titulo) {
+		this.titulo = titulo;
+	}
+
+	public String getAsunto() {
+		return asunto;
+	}
+
+	public void setAsunto(String asunto) {
+		this.asunto = asunto;
+	}
+
+	public String getAula() {
+		return aula;
+	}
+
+	public void setAula(String aula) {
+		this.aula = aula;
+	}
+
+	public LocalDateTime getFechaHora() {
+		return fechaHora;
+	}
+
+	public void setFechaHora(LocalDateTime fechaHora) {
+		this.fechaHora = fechaHora;
+	}
+
+	public Integer getIdAlumnoSeleccionado() {
+		return idAlumnoSeleccionado;
+	}
+
+	public void setIdAlumnoSeleccionado(Integer idAlumnoSeleccionado) {
+		this.idAlumnoSeleccionado = idAlumnoSeleccionado;
 	}
 
 	@Override
