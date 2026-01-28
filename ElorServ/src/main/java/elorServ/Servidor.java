@@ -25,6 +25,7 @@ import elorServ.modelo.entities.Horarios;
 import elorServ.modelo.entities.Reuniones;
 import elorServ.modelo.entities.Users;
 import elorServ.modelo.message.Message;
+import elorServ.modelo.util.CryptoUtil;
 
 @SpringBootApplication
 public class Servidor {
@@ -52,6 +53,8 @@ public class Servidor {
 				.registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT,
 						context) -> LocalDateTime.parse(json.getAsString()))
 				.create();
+		
+		CryptoUtil.inicializar();
 	}
 
 	/**
@@ -135,23 +138,48 @@ public class Servidor {
 
 		@Override
 		public void run() {
-			try {
-				entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				salida = new PrintWriter(socket.getOutputStream(), true);
+		    try {
+		        entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		        salida = new PrintWriter(socket.getOutputStream(), true);
 
-				System.out.println("Bienvenido al servidor ELORRIETA");
+		        System.out.println("Bienvenido al servidor ELORRIETA");
 
-				String mensajeJson;
-				while ((mensajeJson = entrada.readLine()) != null) {
-					System.out.println("[RECIBIDO] " + mensajeJson);
-					procesarMensajeJson(mensajeJson);
-				}
+		        enviarClavePublica();
 
-			} catch (IOException e) {
-				System.err.println("Error en la comunicación con el cliente: " + e.getMessage());
-			} finally {
-				cerrarConexion();
-			}
+		        String mensajeJson;
+		        while ((mensajeJson = entrada.readLine()) != null) {
+		            System.out.println("[RECIBIDO] " + mensajeJson);
+		            procesarMensajeJson(mensajeJson);
+		        }
+
+		    } catch (IOException e) {
+		        System.err.println("Error en la comunicación con el cliente: " + e.getMessage());
+		    } finally {
+		        cerrarConexion();
+		    }
+		}
+		
+		/**
+		 * Envía la clave pública RSA al cliente al inicio de la conexión
+		 */
+		private void enviarClavePublica() {
+		    try {
+		        String publicKeyBase64 = CryptoUtil.getPublicKeyBase64();
+		        
+		        Message mensaje = new Message();
+		        mensaje.setTipo("PUBLIC_KEY");
+		        mensaje.setEstado("OK");
+		        mensaje.setMensaje(publicKeyBase64);
+		        
+		        String json = gson.toJson(mensaje);
+		        salida.println(json);
+		        salida.flush();
+		        
+		        System.out.println("[SERVER] Clave pública enviada al cliente");
+		    } catch (Exception e) {
+		        System.err.println("[SERVER ERROR] Error al enviar clave pública: " + e.getMessage());
+		        e.printStackTrace();
+		    }
 		}
 
 		/**
@@ -220,46 +248,60 @@ public class Servidor {
 		 * Procesa el login del usuario
 		 */
 		private void procesarLogin(Message mensaje) {
-			String usuario = mensaje.getUsuario();
-			String password = mensaje.getPassword();
+		    String usuario = mensaje.getUsuario();
+		    String passwordEncriptada = mensaje.getPassword();
 
-			System.out.println("[LOGIN] Intentando login para: " + usuario);
+		    System.out.println("[LOGIN] Intentando login para: " + usuario);
 
-			try {
-				List<Users> usuarios = usuarioDAO.selectAll();
-				boolean encontrado = false;
-				Users usuarioEncontrado = null;
+		    try {
+		        String password = CryptoUtil.desencriptar(passwordEncriptada);
+		        
+		        if (password == null) {
+		            respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR",
+		                "Error al procesar credenciales");
+		            String respuestaJson = gson.toJson(respuesta);
+		            salida.println(respuestaJson);
+		            salida.flush();
+		            System.out.println("[LOGIN ERROR] No se pudo desencriptar la contraseña");
+		            return;
+		        }
+		        
+		        System.out.println("[LOGIN] Contraseña desencriptada correctamente");
+		        
+		        List<Users> usuarios = usuarioDAO.selectAll();
+		        boolean encontrado = false;
+		        Users usuarioEncontrado = null;
 
-				for (Users user : usuarios) {
-					if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
-						if ((user).getTipos().getId() == 3) {
-							encontrado = true;
-							usuarioEncontrado = user;
-						}
-						break;
-					}
-				}
+		        for (Users user : usuarios) {
+		            if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
+		                if ((user).getTipos().getId() == 3) {
+		                    encontrado = true;
+		                    usuarioEncontrado = user;
+		                }
+		                break;
+		            }
+		        }
 
-				if (encontrado) {
-					respuesta = Message.crearRespuestaConUsuario("LOGIN_RESPONSE", "OK", "Login exitoso",
-							usuarioEncontrado);
-					nombreUsuario = usuario;
-					System.out.println("[LOGIN EXITOSO] Profesor: " + usuario);
-				} else {
-					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR",
-							"Credenciales incorrectas o no eres profesor");
-					System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
-				}
+		        if (encontrado) {
+		            respuesta = Message.crearRespuestaConUsuario("LOGIN_RESPONSE", "OK", "Login exitoso",
+		                    usuarioEncontrado);
+		            nombreUsuario = usuario;
+		            System.out.println("[LOGIN EXITOSO] Profesor: " + usuario);
+		        } else {
+		            respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR",
+		                    "Credenciales incorrectas o no eres profesor");
+		            System.out.println("[LOGIN FALLIDO] Usuario: " + usuario);
+		        }
 
-				String respuestaJson = gson.toJson(respuesta);
-				salida.println(respuestaJson);
-				salida.flush();
-				System.out.println("[ENVIADO JSON] " + respuestaJson);
+		        String respuestaJson = gson.toJson(respuesta);
+		        salida.println(respuestaJson);
+		        salida.flush();
+		        System.out.println("[ENVIADO JSON] " + respuestaJson);
 
-			} catch (Exception e) {
-				System.err.println("[ERROR] Error en login: " + e.getMessage());
-				enviarRespuestaError("Error interno del servidor");
-			}
+		    } catch (Exception e) {
+		        System.err.println("[ERROR] Error en login: " + e.getMessage());
+		        enviarRespuestaError("Error interno del servidor");
+		    }
 		}
 
 		/**
