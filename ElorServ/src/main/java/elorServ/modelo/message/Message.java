@@ -16,6 +16,7 @@ public class Message {
 	private List<Users> usersList;
 	private List<Horarios> horarioList;
 	private List<Reuniones> reunionesList;
+	private Reuniones reunion;
 	private Integer idProfesor;
 	private Integer cicloId;
 	private Integer curso;
@@ -23,7 +24,12 @@ public class Message {
 	public Message() {
 	}
 
-	// Método estático para crear login
+	/**
+	 * Método estático para crear login
+	 * @param usuario
+	 * @param password
+	 * @return mensaje con los datos recibidos para el login
+	 */
 	public static Message crearLogin(String usuario, String password) {
 		Message msg = new Message();
 		msg.tipo = "LOGIN";
@@ -32,7 +38,11 @@ public class Message {
 		return msg;
 	}
 
-	// NUEVO: Método para solicitar lista de alumnos por profesor
+	/**
+	 * Método para solicitar lista de alumnos por profesor
+	 * @param idProfesor
+	 * @return mensaje
+	 */
 	public static Message createListStudentsById(int idProfesor) {
 		Message msg = new Message();
 		msg.tipo = "GET_ALUMNOS_BY_PROFESOR";
@@ -40,14 +50,22 @@ public class Message {
 		return msg;
 	}
 
-	// Método para solicitar lista de profesores
+	/**
+	 * Método para solicitar lista de profesores
+	 * @return mensaje
+	 */
 	public static Message createListTeachers() {
 		Message msg = new Message();
 		msg.tipo = "GET_PROFESORES";
 		return msg;
 	}
 
-	// Método para solicitar lista de profesores filtrados
+	/**
+	 * Método para solicitar lista de profesores filtrados
+	 * @param cicloId
+	 * @param curso
+	 * @return mensaje
+	 */
 	public static Message createListTeachersByFilters(Integer cicloId, Integer curso) {
 		Message msg = new Message();
 		msg.tipo = "GET_PROFESORES_FILTRADOS";
@@ -56,7 +74,11 @@ public class Message {
 		return msg;
 	}
 
-	// Metodo para solicitar lista de horarios de un profesor
+	/**
+	 * Metodo para solicitar lista de horarios de un profesor
+	 * @param idProfesor
+	 * @return mensaje
+	 */
 	public static Message createHorario(Integer idProfesor) {
 		Message msg = new Message();
 		msg.tipo = "GET_HORARIO_PROFESOR";
@@ -64,7 +86,11 @@ public class Message {
 		return msg;
 	}
 
-	// Metodo para solicitar lista de reuniones de un profesor
+	/**
+	 * Metodo para solicitar lista de reuniones de un profesor
+	 * @param idProfesor
+	 * @return mensaje
+	 */
 	public static Message createGetReunionesProfesor(int idProfesor) {
 		Message msg = new Message();
 		msg.setTipo("GET_REUNIONES_PROFESOR");
@@ -72,6 +98,13 @@ public class Message {
 		return msg;
 	}
 
+	/**
+	 * Metodo para solicitar lista de alumnos filtrados por profesor, ciclo y curso
+	 * @param idProfesor
+	 * @param cicloId
+	 * @param curso
+	 * @return mensaje
+	 */
 	public static Message createListStudentsByProfesorAndFilters(int idProfesor, Integer cicloId, Integer curso) {
 		Message msg = new Message();
 		msg.tipo = "GET_ALUMNOS_FILTRADOS";
@@ -81,7 +114,27 @@ public class Message {
 		return msg;
 	}
 
-	// Constructor para respuestas con objeto Users (servidor -> cliente)
+	// Método para actualizar una reunión
+	/**
+	 * Método para actualizar una reunión
+	 * @param reunion
+	 * @return mensaje
+	 */
+	public static Message createActualizarReunion(Reuniones reunion) {
+		Message msg = new Message();
+		msg.tipo = "ACTUALIZAR_REUNION";
+		msg.reunion = reunion;
+		return msg;
+	}
+
+	/**
+	 * Constructor para respuestas con objeto Users
+	 * @param tipo
+	 * @param estado
+	 * @param mensaje
+	 * @param userData
+	 * @return mensaje para una respuesta con un objeto user
+	 */
 	public static Message crearRespuestaConUsuario(String tipo, String estado, String mensaje, Users userData) {
 		Message msg = new Message();
 		msg.tipo = tipo;
@@ -91,7 +144,13 @@ public class Message {
 		return msg;
 	}
 
-	// Constructor para respuestas simples
+	/**
+	 * Constructor para respuestas simples
+	 * @param tipo
+	 * @param estado
+	 * @param mensaje
+	 * @return mensaje para una respuesta simple
+	 */
 	public static Message crearRespuesta(String tipo, String estado, String mensaje) {
 		Message msg = new Message();
 		msg.tipo = tipo;
@@ -100,7 +159,14 @@ public class Message {
 		return msg;
 	}
 
-	// NUEVO: Constructor para respuestas con lista de usuarios
+	/**
+	 * Constructor para respuestas con lista de usuarios
+	 * @param tipo
+	 * @param estado
+	 * @param mensaje
+	 * @param usersList
+	 * @return mensaje con lista de usuarios
+	 */
 	public static Message crearRespuestaConLista(String tipo, String estado, String mensaje, List<Users> usersList) {
 		Message msg = new Message();
 		msg.tipo = tipo;
@@ -110,6 +176,14 @@ public class Message {
 		return msg;
 	}
 
+	/**
+	 * Constructor para respuesta con lista de horarios
+	 * @param tipo
+	 * @param estado
+	 * @param mensaje
+	 * @param listHorarios
+	 * @return mensaje con lista de horarios
+	 */
 	public static Message crearRespuestaConListaHorarios(String tipo, String estado, String mensaje,
 			List<Horarios> listHorarios) {
 		Message msg = new Message();
@@ -120,6 +194,14 @@ public class Message {
 		return msg;
 	}
 	
+	/**
+	 * Constructor para respuesta con lista de reuniones
+	 * @param tipo
+	 * @param estado
+	 * @param mensaje
+	 * @param listReuniones
+	 * @return mensaje con lista de reuniones 
+	 */
 	public static Message crearRespuestaConListaReuniones(String tipo, String estado, String mensaje,
 			List<Reuniones> listReuniones) {
 		Message msg = new Message();
@@ -130,7 +212,23 @@ public class Message {
 		return msg;
 	}
 
-	// Getters y Setters
+	/**
+	 * Constructor para respuestas con una reunión
+	 * @param tipo
+	 * @param estado
+	 * @param mensaje
+	 * @param reunion
+	 * @return mensaje con una reunion
+	 */
+	public static Message crearRespuestaConReunion(String tipo, String estado, String mensaje, Reuniones reunion) {
+		Message msg = new Message();
+		msg.tipo = tipo;
+		msg.estado = estado;
+		msg.mensaje = mensaje;
+		msg.reunion = reunion;
+		return msg;
+	}
+
 	public String getTipo() {
 		return tipo;
 	}
@@ -145,6 +243,14 @@ public class Message {
 
 	public void setReunionesList(List<Reuniones> reunionesList) {
 	    this.reunionesList = reunionesList;
+	}
+
+	public Reuniones getReunion() {
+		return reunion;
+	}
+
+	public void setReunion(Reuniones reunion) {
+		this.reunion = reunion;
 	}
 
 	public String getUsuario() {

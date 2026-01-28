@@ -49,4 +49,54 @@ public class ReunionesDao extends GenericDao<Reuniones> {
         
         return reuniones;
     }
+    
+    /**
+     * Actualiza el estado de una reunión
+     * @param idReunion ID de la reunión a actualizar
+     * @param nuevoEstado Nuevo estado de la reunión (pendiente, aceptada, denegada, conflicto)
+     * @return true si se actualizó correctamente, false en caso contrario
+     */
+    @SuppressWarnings("deprecation")
+	public boolean actualizarEstadoReunion(int idReunion, String nuevoEstado) {
+        Transaction tx = null;
+        
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            
+            System.out.println("[DAO] Actualizando reunión ID: " + idReunion + " al estado: " + nuevoEstado);
+            
+            Reuniones reunion = session.get(Reuniones.class, idReunion);
+            
+            if (reunion != null) {
+                reunion.setEstado(nuevoEstado);
+                
+                session.update(reunion);
+                
+                tx.commit();
+                
+                System.out.println("[DAO] Reunión ID " + idReunion + " actualizada exitosamente a estado: " + nuevoEstado);
+                return true;
+            } else {
+                System.out.println("[DAO ERROR] No se encontró la reunión con ID: " + idReunion);
+                if (tx != null) {
+                    tx.rollback();
+                }
+                return false;
+            }
+            
+        } catch (Exception e) {
+            System.out.println("[DAO ERROR] Error al actualizar reunión: " + e.getMessage());
+            e.printStackTrace();
+            
+            if (tx != null) {
+                try {
+                    tx.rollback();
+                } catch (Exception ex) {
+                    System.out.println("[DAO ERROR] Error en rollback: " + ex.getMessage());
+                }
+            }
+            return false;
+        }
+    }
+
 }

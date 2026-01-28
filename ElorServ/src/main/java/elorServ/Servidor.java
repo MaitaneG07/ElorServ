@@ -199,6 +199,10 @@ public class Servidor {
 		            case "GET_PROFESORES_FILTRADOS":
 		            	procesarFilterTeachers(mensaje);
 		            	break;
+		            	
+		            case "ACTUALIZAR_REUNION":
+		                procesarActualizarReunion(mensaje);
+		                break;
 
 		            default:
 		                System.err.println("[ERROR] Tipo no reconocido: '" + tipo + "'");
@@ -511,6 +515,57 @@ public class Servidor {
 		        System.err.println("[ERROR] En procesarReuniones: " + e.getMessage());
 		        e.printStackTrace();
 		        enviarRespuestaError("Error al obtener reuniones");
+		    }
+		}
+		
+		/**
+		 * Procesa la actualización del estado de una reunión
+		 * @param mensaje
+		 */
+		private void procesarActualizarReunion(Message mensaje) {
+		    try {
+		        System.out.println("[ACTUALIZAR_REUNION] Inicio del proceso");
+		        
+		        Reuniones reunion = mensaje.getReunion();
+		        
+		        if (reunion == null) {
+		            System.err.println("[ERROR] La reunión recibida es null");
+		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "ERROR", 
+		                "No se recibió información de la reunión");
+		            String respuestaJson = gson.toJson(respuesta);
+		            salida.println(respuestaJson);
+		            salida.flush();
+		            return;
+		        }
+		        
+		        System.out.println("[ACTUALIZAR_REUNION] ID: " + reunion.getIdReunion() + 
+		                         " - Nuevo estado: " + reunion.getEstado());
+		        
+		        ReunionesDao reunionesDao = new ReunionesDao();
+		        boolean actualizado = reunionesDao.actualizarEstadoReunion(
+		            reunion.getIdReunion(), 
+		            reunion.getEstado()
+		        );
+		        
+		        if (actualizado) {
+		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "OK", 
+		                "Reunión actualizada correctamente");
+		            System.out.println("[ÉXITO] Reunión actualizada exitosamente");
+		        } else {
+		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "ERROR", 
+		                "No se pudo actualizar la reunión");
+		            System.err.println("[ERROR] Fallo al actualizar la reunión en la BD");
+		        }
+		        
+		        String respuestaJson = gson.toJson(respuesta);
+		        salida.println(respuestaJson);
+		        salida.flush();
+		        System.out.println("[ENVIADO] Respuesta de actualización");
+		        
+		    } catch (Exception e) {
+		        System.err.println("[ERROR] Excepción al actualizar reunión: " + e.getMessage());
+		        e.printStackTrace();
+		        enviarRespuestaError("Error interno del servidor al actualizar reunión");
 		    }
 		}
 
