@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import elorServ.modelo.entities.Users;
 import elorServ.modelo.exception.ElorException;
+import elorServ.restApi.serviceRest.EmailService;
 import elorServ.restApi.serviceRest.UsersService;
 import jakarta.validation.Valid;
 
@@ -33,6 +34,8 @@ public class UsersController {
     
     @Autowired
     private UsersService usersService;
+    @Autowired
+    private EmailService emailService;
     
     /**
      * GET /api/users
@@ -117,33 +120,82 @@ public class UsersController {
     }
     
     
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+//        // 1. Intentamos obtener "email" o "username" para ser flexibles
+//        String usuario = credenciales.get("username");
+//        if (usuario == null) {
+//            usuario = credenciales.get("username");
+//        }
+//
+//        String password = credenciales.get("password");
+//        
+//        // 2. VALIDACIÓN DE SEGURIDAD (Esto evita el NullPointerException)
+//        if (usuario == null || password == null) {
+//            Map<String, String> error = new HashMap<>();
+//            error.put("error", "Faltan datos: se requiere 'username') y 'password'");
+//            // Imprimimos para ver qué claves llegaron realmente
+//            System.out.println("Claves recibidas: " + credenciales.keySet()); 
+//            return ResponseEntity.badRequest().body(error);
+//        }
+//        
+//        // 3. Llamamos al servicio con el dato seguro
+//        Optional<Users> user = usersService.autenticar(usuario, password);
+//        
+//        if (user.isPresent()) {
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("mensaje", "Login exitoso");
+//            response.put("user", user.get());
+//            return ResponseEntity.ok(response);
+//        } else {
+//            Map<String, String> error = new HashMap<>();
+//            error.put("error", "Credenciales inválidas");
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+//        }
+//    }
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
-        // 1. Intentamos obtener "email" o "username" para ser flexibles
+        
+        // --- TÚ CÓDIGO DE EXTRACCIÓN Y VALIDACIÓN ---
         String usuario = credenciales.get("username");
+        // Nota: En tu código original repetías "username". Si querías permitir login con email, sería así:
         if (usuario == null) {
-            usuario = credenciales.get("username");
+            usuario = credenciales.get("email"); 
         }
 
         String password = credenciales.get("password");
-        
-        // 2. VALIDACIÓN DE SEGURIDAD (Esto evita el NullPointerException)
+
         if (usuario == null || password == null) {
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Faltan datos: se requiere 'username') y 'password'");
-            // Imprimimos para ver qué claves llegaron realmente
-            System.out.println("Claves recibidas: " + credenciales.keySet()); 
+            error.put("error", "Faltan datos: se requiere 'username' (o email) y 'password'");
             return ResponseEntity.badRequest().body(error);
         }
-        
-        // 3. Llamamos al servicio con el dato seguro
+
+        // --- LLAMADA AL SERVICIO DE AUTENTICACIÓN ---
         Optional<Users> user = usersService.autenticar(usuario, password);
-        
+
         if (user.isPresent()) {
+            Users usuarioLogueado = user.get();
+
+            // (2) ENVÍO DEL EMAIL (NUEVO)
+            // Usamos un hilo nuevo (Thread) para que el return del login sea inmediato 
+            // y no tenga que esperar a que se envíe el correo (que tarda unos segundos).
+            new Thread(() -> {
+                try {
+                    // Llamamos al método que creamos antes pasando el ID
+                    emailService.enviarCorreoFijo(usuarioLogueado.getUsername());
+                } catch (Exception e) {
+                    System.err.println("Error enviando email tras login: " + e.getMessage());
+                }
+            }).start();
+
+            // --- RESPUESTA EXITOSA ---
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Login exitoso");
-            response.put("user", user.get());
+            response.put("user", usuarioLogueado);
             return ResponseEntity.ok(response);
+
         } else {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Credenciales inválidas");
