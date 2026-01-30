@@ -17,92 +17,83 @@ public class UsersDao extends GenericDao<Users>{
 
     /**
      * Obtiene alumnos de un profesor con filtros opcionales de ciclo y curso
-     * @param profesorId ID del profesor
-     * @param cicloId ID del ciclo (null para todos)
-     * @param curso Número de curso (null para todos)
-     * @return Lista de alumnos que cumplen los criterios
      */
-    public List<Users> getAlumnosByProfesorAndFilters(
-            Integer profesorId,
-            Integer cicloId,
-            Integer curso) {
-
-        List<Users> alumnos;
-
-        System.out.println("[DAO] Buscando alumnos - Profesor: " + profesorId + ", Ciclo: " + cicloId + ", Curso: " + curso);
-
+    public List<Users> getAlumnosByProfesorAndFilters(Integer profesorId, Integer cicloId, Integer curso) {
+        List<Users> alumnos = null;
+        
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-
-            StringBuilder hql = new StringBuilder();
-            hql.append("SELECT DISTINCT u ");
-            hql.append("FROM Users u ");
-            hql.append("JOIN Matriculaciones m ON m.users = u ");  // Cambiado: m.users en lugar de m.alumId
-            hql.append("JOIN Modulos mo ON mo.ciclos = m.ciclos AND mo.curso = m.curso ");  // Cambiado: mo.ciclos en lugar de mo.cicloId
-            hql.append("JOIN Horarios h ON h.modulos = mo ");
-            hql.append("WHERE h.users.id = :profesorId ");
-            hql.append("AND u.tipos.id = 4 "); // alumnos (tipo_id = 4)
-
+            Transaction tx = session.beginTransaction();
+            
+            System.out.println("[DAO] Buscando alumnos - Profesor: " + profesorId + 
+                              ", Ciclo: " + cicloId + ", Curso: " + curso);
+            
+            StringBuilder hql = new StringBuilder(
+                "SELECT DISTINCT u FROM Users u " +
+                "JOIN Matriculaciones m ON m.users.id = u.id " +
+                "JOIN Modulos mo ON mo.ciclos.id = m.ciclos.id AND mo.curso = m.curso " +
+                "JOIN Horarios h ON h.modulos.id = mo.id " +
+                "WHERE h.profesor.id = :profesorId " +  // ← CORREGIDO: h.profesor
+                "AND u.tipos.id = 4"
+            );
+            
             if (cicloId != null) {
-                hql.append(" AND m.ciclos.id = :cicloId ");
+                hql.append(" AND m.ciclos.id = :cicloId");
             }
-
+            
             if (curso != null) {
-                hql.append(" AND m.curso = :curso ");
+                hql.append(" AND m.curso = :curso");
             }
-
-            hql.append("ORDER BY u.apellidos, u.nombre");
-
+            
+            hql.append(" ORDER BY u.apellidos, u.nombre");
+            
             System.out.println("[DAO] HQL: " + hql.toString());
-
+            
             Query<Users> query = session.createQuery(hql.toString(), Users.class);
             query.setParameter("profesorId", profesorId);
-
+            
             if (cicloId != null) {
                 query.setParameter("cicloId", cicloId);
             }
-
+            
             if (curso != null) {
                 query.setParameter("curso", curso);
             }
-
-            alumnos = query.getResultList();
             
-            System.out.println("[DAO] Alumnos encontrados: " + alumnos.size());
+            alumnos = query.list();
+            tx.commit();
+            
+            System.out.println("[DAO] Alumnos encontrados: " + (alumnos != null ? alumnos.size() : 0));
             
         } catch (Exception e) {
-            System.err.println("[DAO ERROR] " + e.getMessage());
+            System.out.println("[DAO ERROR] " + e.getMessage());
             e.printStackTrace();
-            return null;
         }
-
+        
         return alumnos;
     }
     
     /**
      * Obtiene profesores con filtros opcionales de ciclo y curso
-     * @param cicloId ID del ciclo (null para todos)
-     * @param curso Número de curso (null para todos)
-     * @return Lista de profesores que cumplen los criterios
      */
     public List<Users> getProfesoresByFilters(Integer cicloId, Integer curso) {
-        
-        List<Users> profesores;
-
-        System.out.println("[DAO] Buscando profesores - Ciclo: " + cicloId + ", Curso: " + curso);
+        List<Users> profesores = null;
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+            
+            System.out.println("[DAO] Buscando profesores - Ciclo: " + cicloId + ", Curso: " + curso);
 
             StringBuilder hql = new StringBuilder();
             hql.append("SELECT DISTINCT p ");
             hql.append("FROM Users p ");
-            hql.append("WHERE p.tipos.id = 3 ");  
+            hql.append("WHERE p.tipos.id = 3 ");
             
             if (cicloId != null || curso != null) {
                 hql.append("AND EXISTS (");
                 hql.append("    SELECT 1 ");
                 hql.append("    FROM Horarios h ");
                 hql.append("    JOIN h.modulos mo ");
-                hql.append("    WHERE h.users.id = p.id ");
+                hql.append("    WHERE h.profesor.id = p.id ");  // ← CORREGIDO: h.profesor
                 
                 if (cicloId != null) {
                     hql.append("    AND mo.ciclos.id = :cicloId ");
@@ -129,14 +120,14 @@ public class UsersDao extends GenericDao<Users>{
                 query.setParameter("curso", curso);
             }
 
-            profesores = query.getResultList();
+            profesores = query.list();
+            tx.commit();
             
             System.out.println("[DAO] Profesores encontrados: " + profesores.size());
             
         } catch (Exception e) {
             System.err.println("[DAO ERROR] " + e.getMessage());
             e.printStackTrace();
-            return null;
         }
 
         return profesores;
