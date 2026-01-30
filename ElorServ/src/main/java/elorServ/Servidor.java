@@ -209,7 +209,7 @@ public class Servidor {
 		                break;
 
 		            case "GET_ALUMNOS_BY_PROFESOR":
-		            	procesarGetAllStudentsById(mensaje);
+//		            	procesarGetAllStudentsById(mensaje);
 		                break;
 
 		            case "GET_ALUMNOS_FILTRADOS":
@@ -345,45 +345,45 @@ public class Servidor {
 		}
 		
 		
-		public void procesarGetAllStudents(Message mensaje) {
-			int idProfesor = mensaje.getIdProfesor();
-
-			System.out.println("[GET_ALUMNOS_BY_PROFESOR] Intentando obtener alumnos del profesor: " + idProfesor);
-
-			try {
-				List<Users> listStudents = usuarioDAO.selectAll();
-				List<Users> usuariosEncontrados = new ArrayList<>();
-
-				for (Users alumno : listStudents) {
-					if (alumno.getTipos().getId() == 4) {
-						usuariosEncontrados.add(alumno);
-					}
-				}
-
-				if (usuariosEncontrados != null && !usuariosEncontrados.isEmpty()) {
-					respuesta = Message.crearRespuestaConLista("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "OK",
-							"Se encontraron " + usuariosEncontrados.size() + " alumnos", usuariosEncontrados);
-					System.out.println("[GET ALUMNOS EXITOSO] Profesor ID: " + idProfesor + ", Alumnos encontrados: "
-							+ usuariosEncontrados.size());
-				} else {
-					respuesta = Message.crearRespuesta("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "ERROR",
-							"No se encontraron alumnos");
-					System.out
-							.println("[GET ALUMNOS FALLIDO] Profesor ID: " + idProfesor + "No se encontraron alumnos");
-				}
-
-				String respuestaJson = gson.toJson(respuesta);
-				salida.println(respuestaJson);
-				salida.flush();
-				System.out.println("[ENVIADO JSON] " + respuestaJson);
-
-			} catch (Exception e) {
-				System.err.println("[ERROR] Error en la búsqueda de alumnos: " + e.getMessage());
-				e.printStackTrace();
-				enviarRespuestaError("Error interno del servidor");
-			}
-		}
-		
+//		public void procesarGetAllStudents(Message mensaje) {
+//			int idProfesor = mensaje.getIdProfesor();
+//
+//			System.out.println("[GET_ALUMNOS_BY_PROFESOR] Intentando obtener alumnos del profesor: " + idProfesor);
+//
+//			try {
+//				List<Users> listStudents = usuarioDAO.selectAll();
+//				List<Users> usuariosEncontrados = new ArrayList<>();
+//
+//				for (Users alumno : listStudents) {
+//					if (alumno.getTipos().getId() == 4) {
+//						usuariosEncontrados.add(alumno);
+//					}
+//				}
+//
+//				if (usuariosEncontrados != null && !usuariosEncontrados.isEmpty()) {
+//					respuesta = Message.crearRespuestaConLista("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "OK",
+//							"Se encontraron " + usuariosEncontrados.size() + " alumnos", usuariosEncontrados);
+//					System.out.println("[GET ALUMNOS EXITOSO] Profesor ID: " + idProfesor + ", Alumnos encontrados: "
+//							+ usuariosEncontrados.size());
+//				} else {
+//					respuesta = Message.crearRespuesta("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "ERROR",
+//							"No se encontraron alumnos");
+//					System.out
+//							.println("[GET ALUMNOS FALLIDO] Profesor ID: " + idProfesor + "No se encontraron alumnos");
+//				}
+//
+//				String respuestaJson = gson.toJson(respuesta);
+//				salida.println(respuestaJson);
+//				salida.flush();
+//				System.out.println("[ENVIADO JSON] " + respuestaJson);
+//
+//			} catch (Exception e) {
+//				System.err.println("[ERROR] Error en la búsqueda de alumnos: " + e.getMessage());
+//				e.printStackTrace();
+//				enviarRespuestaError("Error interno del servidor");
+//			}
+//		}
+//		
 		/**
 		 * Procesa el mensaje para obtener y enviar la lista de profesores
 		 * 
@@ -630,7 +630,7 @@ public class Servidor {
 		        salida.println(respuestaJson);
 		        salida.flush();
 		        System.out.println("[ENVIADO] Respuesta de reuniones");
-		        
+		       
 		    } catch (Exception e) {
 		        System.err.println("[ERROR] En procesarReuniones: " + e.getMessage());
 		        e.printStackTrace();
@@ -671,6 +671,12 @@ public class Servidor {
 		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "OK", 
 		                "Reunión actualizada correctamente");
 		            System.out.println("[ÉXITO] Reunión actualizada exitosamente");
+		            
+		            
+		            
+		            
+		            
+		            
 		        } else {
 		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "ERROR", 
 		                "No se pudo actualizar la reunión");
@@ -733,7 +739,7 @@ public class Servidor {
 		        }
 
 		        Reuniones reunion = new Reuniones(
-		                estado,
+		                estado,  poner esto en parametro
 		                titulo,
 		                asunto,
 		                aula,
@@ -754,6 +760,26 @@ public class Servidor {
 		                    "OK",
 		                    "Reunión creada correctamente"
 		            );
+		            
+		         // ---------------------------------------------------------
+		            // INICIO BLOQUE ENVÍO DE EMAIL
+		            // ---------------------------------------------------------
+		            
+		            String emailAlumno = usuarioDAO.selectById(idAlumno).getEmail();		           
+		            String emailProfesor = usuarioDAO.selectById(idProfesor).getEmail();
+		            
+		            if (emailProfesor != null && !emailProfesor.isEmpty()) {
+		                // Ejecutamos en un HILO NUEVO para no frenar la respuesta al cliente
+		                new Thread(() -> {
+		                    EmailES emailService = new EmailES(); // Esto carga la config encriptada automáticamente
+		                    emailService.enviarConfirmacionReunion(emailProfesor, titulo, aula, fechaHora);
+		                    emailService.enviarConfirmacionReunion(emailAlumno, titulo, aula, fechaHora);
+		                }).start();
+		            }
+		            
+		            // ---------------------------------------------------------
+		            // FIN BLOQUE ENVÍO DE EMAIL
+		            // -
 		        } else {
 		            System.err.println("[CREAR_REUNION ERROR] Error al insertar en BD");
 
