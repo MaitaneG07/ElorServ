@@ -47,6 +47,7 @@ public class Servidor {
 		this.clientesConectados = new ArrayList<>();
 		this.ejecutando = false;
 		this.usuarioDAO = new UsersDao();
+		
 		// Configurar Gson con adaptadores para LocalDateTime
 		this.gson = new GsonBuilder()
 				.registerTypeAdapter(LocalDateTime.class,
@@ -245,6 +246,7 @@ public class Servidor {
 					nombreUsuario = usuario;
 					System.out.println("[LOGIN EXITOSO] Profesor: " + usuario);
 					
+			
 					// -----------------------------------------------------------
 		            // INICIO INTEGRACIÓN CORREO
 		            // -----------------------------------------------------------
@@ -287,12 +289,8 @@ public class Servidor {
 				enviarRespuestaError("Error interno del servidor");
 			}
 		}
-
-		/**
-		 * Procesa el mensaje para obtener y enviar la lista de alumnos
-		 * 
-		 * @param mensaje
-		 */
+		
+		
 		public void procesarGetAllStudents(Message mensaje) {
 			int idProfesor = mensaje.getIdProfesor();
 
@@ -579,7 +577,7 @@ public class Servidor {
 	public static void main(String[] args) {
 
 		SpringApplication.run(Servidor.class, args);
-		/*int puerto = 8080;
+		int puerto = 8080;
 
 		System.out.println("╔═══════════════════════════════════╗");
 		System.out.println("║   SERVIDOR EDUCATIVO ELORRIETA    ║");
@@ -592,7 +590,7 @@ public class Servidor {
 			servidor.detener();
 		}));
 
-		servidor.iniciar();*/
+		servidor.iniciar();
 		
 		
 	}
