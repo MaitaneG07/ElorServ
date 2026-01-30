@@ -579,7 +579,7 @@ public class Servidor {
 	public static void main(String[] args) {
 
 		SpringApplication.run(Servidor.class, args);
-		int puerto = 8080;
+		/*int puerto = 8080;
 
 		System.out.println("╔═══════════════════════════════════╗");
 		System.out.println("║   SERVIDOR EDUCATIVO ELORRIETA    ║");
@@ -592,6 +592,8 @@ public class Servidor {
 			servidor.detener();
 		}));
 
-		servidor.iniciar();
+		servidor.iniciar();*/
+		
+		
 	}
 }
