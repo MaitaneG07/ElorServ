@@ -25,7 +25,7 @@ import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.serviceRest.EmailService;
 import elorServ.restApi.serviceRest.UsersService;
 import jakarta.validation.Valid;
-
+import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
 
 @RestController
@@ -273,6 +273,11 @@ public class UsersController {
             err.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
         }
+    }
+    
+    @GetMapping("/alumnos/tabla")
+    public List<AlumnoTablaDto> getAlumnosTabla() {
+        return usersService.obtenerAlumnosTabla();
     }
 }
 
