@@ -12,6 +12,7 @@ import elorServ.modelo.entities.Users;
 import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
+import elorServ.restApi.dto.ProfesorTablaDto;
 import elorServ.restApi.repositoryRest.UsersRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -150,14 +151,42 @@ public class UsersService {
 	    return Optional.of(dto);
 	}
 	
+	public List<ProfesorTablaDto> obtenerProfesoresTabla() {
+
+	    String sql = """
+	        SELECT 
+	            u.id,
+	            u.nombre,
+	            u.apellidos
+	        FROM users u
+	        WHERE u.tipo_id = 3
+	        ORDER BY u.apellidos, u.nombre
+	    """;
+
+	    Query q = em.createNativeQuery(sql);
+
+	    @SuppressWarnings("unchecked")
+	    List<Object[]> rows = q.getResultList();
+
+	    return rows.stream()
+	        .map(r -> new ProfesorTablaDto(
+	            ((Number) r[0]).intValue(),
+	            (String) r[1],
+	            (String) r[2]
+	        ))
+	        .toList();
+	}
+	
 	public List<AlumnoTablaDto> obtenerAlumnosTabla() {
 
 	    String sql = """
 	        SELECT 
+	            u.id,
 	            u.nombre,
 	            u.apellidos,
 	            c.nombre AS ciclo,
-	            m.curso
+	            m.curso,
+	            u.argazkia_url
 	        FROM users u
 	        JOIN matriculaciones m ON m.alum_id = u.id
 	        JOIN ciclos c ON c.id = m.ciclo_id
@@ -166,15 +195,18 @@ public class UsersService {
 	    """;
 
 	    Query q = em.createNativeQuery(sql);
+
 	    @SuppressWarnings("unchecked")
 	    List<Object[]> rows = q.getResultList();
 
 	    return rows.stream()
 	        .map(r -> new AlumnoTablaDto(
-	            (String) r[0],
+	            ((Number) r[0]).intValue(),
 	            (String) r[1],
 	            (String) r[2],
-	            ((Number) r[3]).intValue()
+	            (String) r[3],
+	            ((Number) r[4]).intValue(),
+	            (String) r[5]
 	        ))
 	        .toList();
 	}

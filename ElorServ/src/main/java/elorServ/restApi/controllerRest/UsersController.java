@@ -25,6 +25,7 @@ import elorServ.restApi.serviceRest.UsersService;
 import jakarta.validation.Valid;
 import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
+import elorServ.restApi.dto.ProfesorTablaDto;
 
 @RestController
 @RequestMapping("/api/users")
@@ -246,6 +247,11 @@ public class UsersController {
     @GetMapping("/alumnos/tabla")
     public List<AlumnoTablaDto> getAlumnosTabla() {
         return usersService.obtenerAlumnosTabla();
+    }
+    
+    @GetMapping("/profesores/tabla")
+    public List<ProfesorTablaDto> getProfesoresTabla() {
+        return usersService.obtenerProfesoresTabla();
     }
 }
 
