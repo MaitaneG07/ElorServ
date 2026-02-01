@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import elorServ.modelo.entities.Users;
 import elorServ.modelo.exception.ElorException;
+import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
 import elorServ.restApi.repositoryRest.UsersRepository;
 import jakarta.persistence.EntityManager;
@@ -149,6 +150,36 @@ public class UsersService {
 	    return Optional.of(dto);
 	}
 	
+	public List<AlumnoTablaDto> obtenerAlumnosTabla() {
+
+	    String sql = """
+	        SELECT 
+	            u.nombre,
+	            u.apellidos,
+	            c.nombre AS ciclo,
+	            m.curso
+	        FROM users u
+	        JOIN matriculaciones m ON m.alum_id = u.id
+	        JOIN ciclos c ON c.id = m.ciclo_id
+	        WHERE u.tipo_id = 4
+	        ORDER BY c.nombre, m.curso, u.apellidos
+	    """;
+
+	    Query q = em.createNativeQuery(sql);
+	    @SuppressWarnings("unchecked")
+	    List<Object[]> rows = q.getResultList();
+
+	    return rows.stream()
+	        .map(r -> new AlumnoTablaDto(
+	            (String) r[0],
+	            (String) r[1],
+	            (String) r[2],
+	            ((Number) r[3]).intValue()
+	        ))
+	        .toList();
+	}
+
+	
 	public Users subirFotoPerfil(Long userId, MultipartFile file) throws Exception {
 	    Users u = usersRepository.findById(userId)
 	            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -176,4 +207,5 @@ public class UsersService {
 	    u.setArgazkiaUrl(urlPublica);
 	    return usersRepository.save(u);
 	}
+	
 }

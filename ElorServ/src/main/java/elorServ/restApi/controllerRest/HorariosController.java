@@ -19,4 +19,9 @@ public class HorariosController {
     public HorarioProfesorDto getHorarioProfesor(@PathVariable("id") Integer profesorId) {
         return horariosService.obtenerHorarioProfesor(profesorId);
     }
+    
+    @GetMapping("/alumno/{id}")
+    public HorarioProfesorDto getHorarioAlumno(@PathVariable Integer id) {
+        return horariosService.obtenerHorarioAlumno(id);
+    }
 }
