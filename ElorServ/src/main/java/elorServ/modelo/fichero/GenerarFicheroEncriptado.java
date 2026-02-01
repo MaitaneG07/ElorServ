@@ -22,7 +22,7 @@ public class GenerarFicheroEncriptado {
             String encryptedData = CryptoUtilsAES.encrypt(rawData);
             
             // Guardamos en un fichero
-            Files.write(Paths.get("config.enc"), encryptedData.getBytes());
+            Files.write(Paths.get("mail_config.txt"), encryptedData.getBytes());
             
             System.out.println("Fichero config.enc generado exitosamente.");
             System.out.println("Contenido encriptado: " + encryptedData);

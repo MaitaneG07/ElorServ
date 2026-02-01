@@ -39,7 +39,7 @@ public class EmailES {
 
 	private void cargarCredenciales() throws Exception {
 		// 1. Leer el fichero encriptado
-		String content = new String(Files.readAllBytes(Paths.get("config.enc")));
+		String content = new String(Files.readAllBytes(Paths.get("mail_config.txt")));
 
 		// 2. Desencriptar
 		String decrypted = CryptoUtilsAES.decrypt(content);
