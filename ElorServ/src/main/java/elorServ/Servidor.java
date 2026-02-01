@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -25,6 +27,7 @@ import elorServ.modelo.email.EmailES;
 import elorServ.modelo.entities.Horarios;
 import elorServ.modelo.entities.Reuniones;
 import elorServ.modelo.entities.Users;
+import elorServ.modelo.exception.ElorException;
 import elorServ.modelo.message.Message;
 import elorServ.modelo.util.CryptoUtil;
 
@@ -645,37 +648,55 @@ public class Servidor {
 		private void procesarActualizarReunion(Message mensaje) {
 		    try {
 		        System.out.println("[ACTUALIZAR_REUNION] Inicio del proceso");
-		        
-		        Reuniones reunion = mensaje.getReunion();
-		        
-		        if (reunion == null) {
+
+		        Reuniones reunionEntrante = mensaje.getReunion();
+
+		        if (reunionEntrante == null) {
 		            System.err.println("[ERROR] La reunión recibida es null");
-		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "ERROR", 
-		                "No se recibió información de la reunión");
-		            String respuestaJson = gson.toJson(respuesta);
-		            salida.println(respuestaJson);
-		            salida.flush();
+		            // ... (código de error igual que antes)
 		            return;
 		        }
-		        
-		        System.out.println("[ACTUALIZAR_REUNION] ID: " + reunion.getIdReunion() + 
-		                         " - Nuevo estado: " + reunion.getEstado());
-		        
+
+		        // 1. Actualizamos el estado en la BD
 		        ReunionesDao reunionesDao = new ReunionesDao();
 		        boolean actualizado = reunionesDao.actualizarEstadoReunion(
-		            reunion.getIdReunion(), 
-		            reunion.getEstado()
+		            reunionEntrante.getIdReunion(), 
+		            reunionEntrante.getEstado()
 		        );
-		        
+
 		        if (actualizado) {
 		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "OK", 
 		                "Reunión actualizada correctamente");
-		            System.out.println("[ÉXITO] Reunión actualizada exitosamente");
 		            
 		            
+		            //Envio de email a profesor y alumno
+		            Reuniones reunionCompleta = reunionesDao.selectById(reunionEntrante.getIdReunion());
 		            
-		            
-		            
+		            if (reunionCompleta != null) {
+		                final String estadoNuevo = reunionEntrante.getEstado();
+		                final String emailProfesor = (reunionCompleta.getProfesores() != null) 
+		                                           ? reunionCompleta.getProfesores().getEmail() : null;
+		                final String emailAlumno = (reunionCompleta.getAlumnos() != null) 
+		                                         ? reunionCompleta.getAlumnos().getEmail() : null;
+
+		                new Thread(() -> {
+		                    EmailES emailService = new EmailES();
+		                    
+		                    // Enviar al profesor
+		                    if (emailProfesor != null && !emailProfesor.isEmpty()) {
+		                        emailService.enviarActualizacionReunion(emailProfesor, estadoNuevo);
+		                        System.out.println("[EMAIL] Enviado al profesor (" + emailProfesor + ")");
+		                    }
+		                    
+		                    // Enviar al alumno
+		                    if (emailAlumno != null && !emailAlumno.isEmpty()) {
+		                        emailService.enviarActualizacionReunion(emailAlumno, estadoNuevo);
+		                        System.out.println("[EMAIL] Enviado al alumno (" + emailAlumno + ")");
+		                    }
+		                }).start();
+		            } else {
+		                System.err.println("[EMAIL WARNING] No se pudo recuperar la reunión completa para enviar correos.");
+		            }
 		            
 		        } else {
 		            respuesta = Message.crearRespuesta("ACTUALIZAR_REUNION_RESPONSE", "ERROR", 
@@ -699,8 +720,7 @@ public class Servidor {
 		 * Procesa el mensaje para crear una reunion
 		 * @param mensaje
 		 */
-		public void procesarCreateReunion(Message mensaje) {
-		    try {
+		public void procesarCreateReunion(Message mensaje) throws ElorException {
 		        System.out.println("[CREAR_REUNION] Inicio del proceso");
 
 		        String estado = mensaje.getEstado();
@@ -739,7 +759,7 @@ public class Servidor {
 		        }
 
 		        Reuniones reunion = new Reuniones(
-		                estado,  poner esto en parametro
+		                estado,  
 		                titulo,
 		                asunto,
 		                aula,
@@ -761,25 +781,30 @@ public class Servidor {
 		                    "Reunión creada correctamente"
 		            );
 		            
-		         // ---------------------------------------------------------
-		            // INICIO BLOQUE ENVÍO DE EMAIL
-		            // ---------------------------------------------------------
-		            
+		            //Envio de email a profesor y alumno		            
 		            String emailAlumno = usuarioDAO.selectById(idAlumno).getEmail();		           
 		            String emailProfesor = usuarioDAO.selectById(idProfesor).getEmail();
 		            
 		            if (emailProfesor != null && !emailProfesor.isEmpty()) {
-		                // Ejecutamos en un HILO NUEVO para no frenar la respuesta al cliente
+		            	
 		                new Thread(() -> {
 		                    EmailES emailService = new EmailES(); // Esto carga la config encriptada automáticamente
-		                    emailService.enviarConfirmacionReunion(emailProfesor, titulo, aula, fechaHora);
-		                    emailService.enviarConfirmacionReunion(emailAlumno, titulo, aula, fechaHora);
+								try {
+									emailService.enviarConfirmacionReunion(emailProfesor, titulo, aula, fechaHora, estado);
+								} catch (ElorException | MessagingException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							
+		                    try {
+								emailService.enviarConfirmacionReunion(emailAlumno, titulo, aula, fechaHora, estado);
+							} catch (ElorException | MessagingException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 		                }).start();
 		            }
 		            
-		            // ---------------------------------------------------------
-		            // FIN BLOQUE ENVÍO DE EMAIL
-		            // -
 		        } else {
 		            System.err.println("[CREAR_REUNION ERROR] Error al insertar en BD");
 
@@ -794,11 +819,7 @@ public class Servidor {
 		        salida.println(respuestaJson);
 		        salida.flush();
 
-		    } catch (Exception e) {
-		        System.err.println("[CREAR_REUNION ERROR] Excepción: " + e.getMessage());
-		        e.printStackTrace();
-		        enviarRespuestaError("Error interno al crear la reunión");
-		    }
+		  
 		}
 
 

@@ -3,7 +3,7 @@ package elorServ.modelo.fichero;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import elorServ.modelo.util.CryptoUtils;
+import elorServ.modelo.util.CryptoUtilsAES;
 
 public class GenerarFicheroEncriptado {
 	
@@ -19,7 +19,7 @@ public class GenerarFicheroEncriptado {
             String rawData = email + "|" + password;
             
             // Encriptamos
-            String encryptedData = CryptoUtils.encrypt(rawData);
+            String encryptedData = CryptoUtilsAES.encrypt(rawData);
             
             // Guardamos en un fichero
             Files.write(Paths.get("config.enc"), encryptedData.getBytes());

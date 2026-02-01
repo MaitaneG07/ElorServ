@@ -4,7 +4,7 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-public class CryptoUtils {
+public class CryptoUtilsAES {
 
 	private static final String SECRET_KEY = "MySuperSecretKey";
 
