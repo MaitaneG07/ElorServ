@@ -4,27 +4,26 @@ import java.time.LocalDateTime;
 
 public class ReunionListaDto {
 
-    private Integer id;
+	private Integer idReunion;
     private String titulo;
     private LocalDateTime fecha;
     private String estado;
-    private String profesorNombre;
-    private String alumnoNombre;
+    private Integer profesorId;
+    private Integer alumnoId;
 
-    public ReunionListaDto(Integer id, String titulo, LocalDateTime fecha,
-                           String estado, String profesorNombre, String alumnoNombre) {
-        this.id = id;
+    public ReunionListaDto(Integer idReunion, String titulo, LocalDateTime fecha, String estado, Integer profesorId, Integer alumnoId) {
+        this.idReunion = idReunion;
         this.titulo = titulo;
         this.fecha = fecha;
         this.estado = estado;
-        this.profesorNombre = profesorNombre;
-        this.alumnoNombre = alumnoNombre;
+        this.profesorId = profesorId;
+        this.alumnoId = alumnoId;
     }
 
-    public Integer getId() { return id; }
+    public Integer getIdReunion() { return idReunion; }
     public String getTitulo() { return titulo; }
     public LocalDateTime getFecha() { return fecha; }
     public String getEstado() { return estado; }
-    public String getProfesorNombre() { return profesorNombre; }
-    public String getAlumnoNombre() { return alumnoNombre; }
+    public Integer getProfesorId() { return profesorId; }
+    public Integer getAlumnoId() { return alumnoId; }
 }
