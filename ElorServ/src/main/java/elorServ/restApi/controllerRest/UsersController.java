@@ -179,16 +179,7 @@ public class UsersController {
         if (user.isPresent()) {
             Users usuarioLogueado = user.get();
 
-            // (2) ENVÍO DEL EMAIL (NUEVO)
-            // Usamos un hilo nuevo (Thread) para que el return del login sea inmediato 
-            // y no tenga que esperar a que se envíe el correo (que tarda unos segundos).
-            new Thread(() -> {
-                try {
-                    emailService.enviarCorreoFijo(usuarioLogueado.getUsername());
-                } catch (Exception e) {
-                    System.err.println("Error enviando email tras login: " + e.getMessage());
-                }
-            }).start();
+ 
 
             // --- RESPUESTA EXITOSA ---
             Map<String, Object> response = new HashMap<>();

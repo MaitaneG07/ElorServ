@@ -1,25 +1,28 @@
 package elorServ.restApi.serviceRest;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-import java.sql.Date;
+import java.util.UUID;
 
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import elorServ.modelo.entities.Users;
-import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
 import elorServ.restApi.repositoryRest.UsersRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import java.sql.Date;
-import java.nio.file.*;
-import java.util.UUID;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -29,6 +32,12 @@ public class UsersService implements InterfaceService<Users>{
 	 @Autowired
 	    private UsersRepository usersRepository;
 
+	    @Autowired
+	    private SessionFactory session; 
+
+	    @Autowired
+	    private EmailService emailService; 
+	    
 	 @Override
 	public List<Users> findAll() {
 		return usersRepository.findAll();
@@ -183,5 +192,7 @@ public class UsersService implements InterfaceService<Users>{
 	    u.setArgazkiaUrl(urlPublica);
 	    return usersRepository.save(u);
 	}
+	
+	
 	
 }

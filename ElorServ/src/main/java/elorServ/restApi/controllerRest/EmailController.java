@@ -16,15 +16,15 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
-    @PostMapping("/notificar")
-    public ResponseEntity<String> enviarNotificacion(@RequestParam String username) {
-        try {
-            // Ya no pasamos asunto ni cuerpo, solo el ID
-            emailService.enviarCorreoFijo(username);
-            return ResponseEntity.ok("Correo enviado correctamente al usuario ID: " + username);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/notificar")
+//    public ResponseEntity<String> enviarNotificacion(@RequestParam String username) {
+//        try {
+//            // Ya no pasamos asunto ni cuerpo, solo el ID
+//            emailService.enviarCorreoFijo(username);
+//            return ResponseEntity.ok("Correo enviado correctamente al usuario ID: " + username);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+//        }
+//    }
 }

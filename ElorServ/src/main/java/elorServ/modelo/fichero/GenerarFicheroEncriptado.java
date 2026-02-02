@@ -24,7 +24,7 @@ public class GenerarFicheroEncriptado {
             // Guardamos en un fichero
             Files.write(Paths.get("mail_config.txt"), encryptedData.getBytes());
             
-            System.out.println("Fichero config.enc generado exitosamente.");
+            System.out.println("Fichero mail_config.txt generado exitosamente.");
             System.out.println("Contenido encriptado: " + encryptedData);
             
         } catch (Exception e) {
