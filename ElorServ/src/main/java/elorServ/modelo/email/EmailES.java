@@ -6,20 +6,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import elorServ.modelo.exception.ElorException;
 import elorServ.modelo.util.CryptoUtilsAES;
+import jakarta.activation.CommandMap;
+import jakarta.activation.MailcapCommandMap;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 public class EmailES {
 
@@ -165,12 +164,9 @@ public class EmailES {
 	
 	public void enviarActualizacionReunion(String destinatario, String estado) {
 
-		// Si no hay credenciales cargadas, salimos (asumiendo que el constructor ya las
-		// cargó)
 		if (username == null || password == null)
 			return;
 
-		// Configuración SMTP (Igual que antes)
 		Properties prop = new Properties();
 		prop.put("mail.smtp.host", "smtp.gmail.com");
 		prop.put("mail.smtp.port", "587");
@@ -215,4 +211,40 @@ public class EmailES {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	//Boton recuperar contrasena de la app movil
+//	public void enviarNuevaPassword(String destinatario, String nuevaPassword, String username) throws MessagingException {
+//	    if (this.username == null || this.password == null) return;
+//
+//	    Properties prop = new Properties();
+//	    prop.put("mail.smtp.host", "smtp.gmail.com");
+//	    prop.put("mail.smtp.port", "587");
+//	    prop.put("mail.smtp.auth", "true");
+//	    prop.put("mail.smtp.starttls.enable", "true");
+//
+//	    Session session = Session.getInstance(prop, new Authenticator() {
+//	        @Override
+//	        protected PasswordAuthentication getPasswordAuthentication() {
+//	            return new PasswordAuthentication(username, password);
+//	        }
+//	    });
+//
+//	    MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+//	    mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+//	    CommandMap.setDefaultCommandMap(mc);
+//
+//	    Message message = new MimeMessage(session);
+//	    message.setFrom(new InternetAddress(this.username));
+//	    message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+//	    message.setSubject("Nueva contraseña temporal");
+//
+//	    String contenido = "Hola " + username + ",\n\n"
+//	            + "Tu contraseña ha sido restablecida.\n"
+//	            + "Tu nueva clave de acceso es: " + nuevaPassword + "\n\n"
+//	            + "Por seguridad, cámbiala tras iniciar sesión.";
+//
+//	    message.setText(contenido);
+//	    Transport.send(message);
+//	}
 }

@@ -24,6 +24,11 @@ public class PasswordRecoveryService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     
+    /**
+     * Busca el usuario, si existe, le cambia la contraseña, encripta la nueva, 
+     * la guarda encriptada en la base de datos y manda un email con la 
+     * contraseña nueva sin encriptar 
+     */
     @Transactional
     public boolean recuperarPassword(String username) {
         // 1. Buscar usuario (El Optional se maneja con .isPresent() o .orElse())

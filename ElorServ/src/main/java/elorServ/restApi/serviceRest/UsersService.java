@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +37,9 @@ public class UsersService implements InterfaceService<Users>{
 
 	    @Autowired
 	    private EmailService emailService; 
+	    
+	    @Autowired
+	    private BCryptPasswordEncoder passwordEncoder;
 	    
 	 @Override
 	public List<Users> findAll() {
@@ -68,12 +71,17 @@ public class UsersService implements InterfaceService<Users>{
 
 	}
 
-	public Optional<Users> autenticar(String username, String password) {
-		 // TODO: En producción, comparar con BCrypt
-        return usersRepository.findByUsernameAndPassword(
-        		username.toLowerCase().trim(), 
-            password
-        );
+//	public Optional<Users> autenticar(String username, String password) {
+//		 // TODO: En producción, comparar con BCrypt
+//        return usersRepository.findByUsernameAndPassword(
+//        		username.toLowerCase().trim(), 
+//            password
+//        );
+//	}
+	public Optional<Users> autenticar(String identifier, String password) {
+	    return usersRepository.findByUsername(identifier)
+	            .or(() -> usersRepository.findByEmail(identifier))
+	            .filter(user -> passwordEncoder.matches(password, user.getPassword()));
 	}
 
 	public boolean existeEmail(String email) {

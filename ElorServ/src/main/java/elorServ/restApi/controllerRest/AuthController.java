@@ -3,6 +3,7 @@ package elorServ.restApi.controllerRest;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,24 +17,21 @@ import elorServ.restApi.serviceRest.PasswordRecoveryService;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
-    
-    @Autowired
-    private PasswordRecoveryService passwordRecoveryService;
-    
+
+	@Autowired
+	private PasswordRecoveryService passwordRecoveryService;
+
     @PostMapping("/recuperar-password")
     public ResponseEntity<?> recuperarPassword(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         
-        if (username == null || username.isEmpty()) {
-            return ResponseEntity.badRequest().body("Username requerido");
-        }
-        
         boolean exito = passwordRecoveryService.recuperarPassword(username);
         
         if (exito) {
-            return ResponseEntity.ok("Se ha enviado una nueva contraseña al email registrado");
+            return ResponseEntity.ok(Map.of("message", "Email enviado con éxito"));
         } else {
-            return ResponseEntity.status(404).body("Usuario no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body(Map.of("error", "Usuario no encontrado o sin email registrado"));
         }
-    }
+	}
 }

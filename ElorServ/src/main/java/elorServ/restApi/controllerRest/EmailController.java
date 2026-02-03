@@ -9,6 +9,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import elorServ.restApi.serviceRest.EmailService;
 
+//@RestController
+//@RequestMapping("/api/mail")
+//public class EmailController {
+//
+//    @Autowired
+//    private EmailService emailService;
+//
+//    @PostMapping("/notificar")
+//    public ResponseEntity<String> enviarNotificacion(@RequestParam String username, String destinatario, String nuevaPassword) {
+//        try {
+//            emailService.enviarNuevaPassword(destinatario, username, nuevaPassword);
+//            return ResponseEntity.ok("Correo enviado correctamente al usuario ID: " + username);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+//        }
+//    }
+
 @RestController
 @RequestMapping("/api/mail")
 public class EmailController {
@@ -16,15 +34,15 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
-//    @PostMapping("/notificar")
-//    public ResponseEntity<String> enviarNotificacion(@RequestParam String username) {
-//        try {
-//            // Ya no pasamos asunto ni cuerpo, solo el ID
-//            emailService.enviarCorreoFijo(username);
-//            return ResponseEntity.ok("Correo enviado correctamente al usuario ID: " + username);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
-//        }
-//    }
+    @PostMapping("/notificar")
+    public ResponseEntity<String> enviarNotificacion(
+            @RequestParam String username, 
+            @RequestParam String destinatario, 
+            @RequestParam String nuevaPassword) {
+        
+        // No más try-catch. Si algo falla, el GlobalExceptionHandler entra en acción.
+        emailService.enviarNuevaPassword(destinatario, username, nuevaPassword);
+        
+        return ResponseEntity.ok("Correo enviado correctamente al usuario ID: " + username);
+    }
 }

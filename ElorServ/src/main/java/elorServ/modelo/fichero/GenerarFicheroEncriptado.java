@@ -13,7 +13,7 @@ public class GenerarFicheroEncriptado {
         try {
             // Tus datos reales
             String email = "elorrieta96@gmail.com";
-            String password = "tzbe aazi hrey uvwb";
+            String password = "dtbn rbdv uogy aeix";
             
             // Unimos los datos con un separador (ej: pipe |)
             String rawData = email + "|" + password;
