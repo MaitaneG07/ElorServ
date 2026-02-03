@@ -79,4 +79,30 @@ public class ReunionesService {
         qUpd.setParameter("rid", reunionId);
         qUpd.executeUpdate();
     }
+    
+    public void crearReunion(
+            Integer profesorId,
+            Integer alumnoId,
+            String titulo,
+            String asunto,
+            String aula,
+            LocalDateTime fecha
+    ) {
+        String sql = """
+            INSERT INTO reuniones
+            (profesor_id, alumno_id, titulo, asunto, aula, fecha, estado)
+            VALUES
+            (:prof, :alum, :titulo, :asunto, :aula, :fecha, 'pendiente')
+        """;
+
+        Query q = em.createNativeQuery(sql);
+        q.setParameter("prof", profesorId);
+        q.setParameter("alum", alumnoId);
+        q.setParameter("titulo", titulo);
+        q.setParameter("asunto", asunto);
+        q.setParameter("aula", aula);
+        q.setParameter("fecha", fecha);
+
+        q.executeUpdate();
+    }
 }

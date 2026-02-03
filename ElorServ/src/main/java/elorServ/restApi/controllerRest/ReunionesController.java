@@ -1,5 +1,6 @@
 package elorServ.restApi.controllerRest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -36,5 +37,22 @@ public class ReunionesController {
         reunionesService.cambiarEstado(reunionId, profesorId, estado);
 
         return Map.of("ok", true, "idReunion", reunionId, "estado", estado);
+    }
+    
+    @PostMapping
+    public Map<String, Object> crearReunion(@RequestBody Map<String, Object> body) {
+
+        Integer profesorId = ((Number) body.get("profesorId")).intValue();
+        Integer alumnoId   = ((Number) body.get("alumnoId")).intValue();
+        String titulo      = (String) body.get("titulo");
+        String asunto      = (String) body.get("asunto");
+        String aula        = (String) body.get("aula");
+        LocalDateTime fecha = LocalDateTime.parse((String) body.get("fecha"));
+
+        reunionesService.crearReunion(
+            profesorId, alumnoId, titulo, asunto, aula, fecha
+        );
+
+        return Map.of("ok", true);
     }
 }
