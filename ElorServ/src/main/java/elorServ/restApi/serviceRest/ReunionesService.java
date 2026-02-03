@@ -1,5 +1,9 @@
 package elorServ.restApi.serviceRest;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +40,26 @@ public class ReunionesService {
         @SuppressWarnings("unchecked")
         List<Object[]> rows = q.getResultList();
 
-        return rows.stream().map(r -> new ReunionListaDto(
-            ((Number) r[0]).intValue(),
-            (String) r[1],
-            (java.time.LocalDateTime) r[2],
-            (String) r[3],
-            ((Number) r[4]).intValue(),
-            ((Number) r[5]).intValue()
-        )).toList();
+        return rows.stream().map(r -> {
+
+            LocalDateTime fecha = null;
+            Object fechaObj = r[2];
+
+            if (fechaObj instanceof Timestamp ts) {
+                fecha = ts.toLocalDateTime();
+            } else if (fechaObj instanceof LocalDateTime ldt) {
+                fecha = ldt;
+            }
+
+            return new ReunionListaDto(
+                ((Number) r[0]).intValue(),
+                (String) r[1],
+                fecha,
+                (String) r[3],
+                ((Number) r[4]).intValue(),
+                ((Number) r[5]).intValue()
+            );
+        }).collect(Collectors.toList());
     }
 
     public void cambiarEstado(Integer reunionId, Integer profesorIdLogeado, String nuevoEstado) {
