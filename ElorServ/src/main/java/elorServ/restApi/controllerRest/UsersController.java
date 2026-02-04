@@ -24,6 +24,10 @@ import elorServ.modelo.exception.UserNotFoundException; // Tu clase personalizad
 import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
 import elorServ.restApi.serviceRest.UsersService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
@@ -47,7 +51,7 @@ public class UsersController {
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Users> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<Users> obtenerPorId(@PathVariable Long id) throws UserNotFoundException {
         Users user = usersService.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + id));
         return ResponseEntity.ok(user);
@@ -78,7 +82,7 @@ public class UsersController {
         @ApiResponse(responseCode = "401", description = "Credenciales incorrectas")
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) throws BadRequestException {
         String usuario = credenciales.get("username") != null ? credenciales.get("username") : credenciales.get("email");
         String password = credenciales.get("password");
 
@@ -94,14 +98,14 @@ public class UsersController {
 
     @Operation(summary = "Obtener perfil de alumno")
     @GetMapping("/{id}/perfil-alumno")
-    public ResponseEntity<PerfilAlumnoDto> getPerfilAlumno(@PathVariable Long id) {
+    public ResponseEntity<PerfilAlumnoDto> getPerfilAlumno(@PathVariable Long id) throws UserNotFoundException {
         return ResponseEntity.ok(usersService.obtenerPerfilAlumno(id.intValue())
                 .orElseThrow(() -> new UserNotFoundException("Perfil no encontrado")));
     }
 
     @Operation(summary = "Subir foto de perfil")
     @PostMapping("/{id}/foto")
-    public ResponseEntity<?> subirFoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> subirFoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception  {
         Users u = usersService.subirFotoPerfil(id, file);
         return ResponseEntity.ok(Map.of(
             "mensaje", "Foto subida",
