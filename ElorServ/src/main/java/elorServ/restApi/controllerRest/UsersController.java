@@ -19,16 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import elorServ.modelo.entities.Users;
-import elorServ.modelo.exception.BadRequestException;  // Tu clase personalizada
-import elorServ.modelo.exception.UserNotFoundException; // Tu clase personalizada
+import elorServ.modelo.exception.BadRequestException;
+import elorServ.modelo.exception.UserNotFoundException;
 import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
-import elorServ.restApi.serviceRest.UsersService;
+import elorServ.restApi.dto.ProfesorTablaDto;      // Tuyo
+import elorServ.restApi.serviceRest.UsersService;  // De Giselle
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import jakarta.validation.Valid;                   // De Giselle
 
 @RestController
 @RequestMapping("/api/users")
@@ -105,7 +106,7 @@ public class UsersController {
 
     @Operation(summary = "Subir foto de perfil")
     @PostMapping("/{id}/foto")
-    public ResponseEntity<?> subirFoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception  {
+    public ResponseEntity<?> subirFoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception {
         Users u = usersService.subirFotoPerfil(id, file);
         return ResponseEntity.ok(Map.of(
             "mensaje", "Foto subida",
@@ -118,6 +119,11 @@ public class UsersController {
     @GetMapping("/alumnos/tabla")
     public List<AlumnoTablaDto> getAlumnosTabla() {
         return usersService.obtenerAlumnosTabla();
+    }
+    
+    @GetMapping("/profesores/tabla")
+    public List<ProfesorTablaDto> getProfesoresTabla() {
+        return usersService.obtenerProfesoresTabla();
     }
 }
 

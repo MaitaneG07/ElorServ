@@ -211,7 +211,7 @@ public class Servidor {
 					break;
 
 				case "GET_ALUMNOS_BY_PROFESOR":
-//		            	procesarGetAllStudentsById(mensaje);
+		            	procesarGetAllStudentsById(mensaje);
 					break;
 
 				case "GET_ALUMNOS_FILTRADOS":
@@ -257,6 +257,50 @@ public class Servidor {
 				enviarRespuestaError("Error al procesar mensaje");
 			}
 		}
+		
+		/**
+		 * Procesa el mensaje para obtener y enviar la lista de alumnos
+		 * 
+		 * @param mensaje
+		 */
+		public void procesarGetAllStudentsById(Message mensaje) {
+			int idProfesor = mensaje.getIdProfesor();
+
+			System.out.println("[GET_ALUMNOS_BY_PROFESOR] Intentando obtener alumnos del profesor: " + idProfesor);
+
+			try {
+				List<Users> listStudents = usuarioDAO.selectAll();
+				List<Users> usuariosEncontrados = new ArrayList<>();
+
+				for (Users alumno : listStudents) {
+					if (alumno.getTipos().getId() == 4) {
+						usuariosEncontrados.add(alumno);
+					}
+				}
+
+				if (usuariosEncontrados != null && !usuariosEncontrados.isEmpty()) {
+					respuesta = Message.crearRespuestaConLista("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "OK",
+							"Se encontraron " + usuariosEncontrados.size() + " alumnos", usuariosEncontrados);
+					System.out.println("[GET ALUMNOS EXITOSO] Profesor ID: " + idProfesor + ", Alumnos encontrados: "
+							+ usuariosEncontrados.size());
+				} else {
+					respuesta = Message.crearRespuesta("GET_ALUMNOS_BY_PROFESOR_RESPONSE", "ERROR",
+							"No se encontraron alumnos");
+					System.out
+							.println("[GET ALUMNOS FALLIDO] Profesor ID: " + idProfesor + "No se encontraron alumnos");
+				}
+
+				String respuestaJson = gson.toJson(respuesta);
+				salida.println(respuestaJson);
+				salida.flush();
+				System.out.println("[ENVIADO JSON] " + respuestaJson);
+
+			} catch (Exception e) {
+				System.err.println("[ERROR] Error en la búsqueda de alumnos: " + e.getMessage());
+				e.printStackTrace();
+				enviarRespuestaError("Error interno del servidor");
+			}
+		}
 
 		/**
 		 * Procesa el login del usuario
@@ -268,7 +312,7 @@ public class Servidor {
 			System.out.println("[LOGIN] Intentando login para: " + usuario);
 
 			try {
-//		        String password = CryptoUtil.desencriptar(passwordEncriptada);
+		        String password = CryptoUtil.desencriptar(passwordEncriptada);
 
 				if (passwordEncriptada == null) {
 					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR", "Error al procesar credenciales");
