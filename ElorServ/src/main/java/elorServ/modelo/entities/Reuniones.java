@@ -8,149 +8,171 @@ import java.time.*;
 @Table(name = "reuniones")
 public class Reuniones implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_reunion")
-    private Integer idReunion;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_reunion")
+	private Integer idReunion;
 
-    @Column(name = "estado", length = 9)
-    private String estado;
+	@Column(name = "estado", length = 9)
+	private String estado;
 
-    @Column(name = "estado_eus", length = 10)
-    private String estadoEus;
+	@Column(name = "estado_eus", length = 10)
+	private String estadoEus;
 
 //    @Column(name = "profesor_id")
-    @ManyToOne
-    @JoinColumn(name = "profesor_id")
-    private Users profesor;
+	@ManyToOne
+	@JoinColumn(name = "profesor_id")
+	private Users profesor;
 
 //    @Column(name = "alumno_id")
-    @ManyToOne
-    @JoinColumn(name = "alumno_id")
-    private Users alumno;
+	@ManyToOne
+	@JoinColumn(name = "alumno_id")
+	private Users alumno;
 
-    @Column(name = "id_centro", length = 20)
-    private String idCentro;
+	@Column(name = "id_centro", length = 20)
+	private String idCentro;
 
-    @Column(name = "titulo", length = 150)
-    private String titulo;
+	@Column(name = "titulo", length = 150)
+	private String titulo;
 
-    @Column(name = "asunto", length = 200)
-    private String asunto;
+	@Column(name = "asunto", length = 200)
+	private String asunto;
 
-    @Column(name = "aula", length = 20)
-    private String aula;
+	@Column(name = "aula", length = 20)
+	private String aula;
 
-    @Column(name = "fecha")
-    private LocalDateTime fecha;
+	@Column(name = "fecha")
+	private LocalDateTime fecha;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    // Constructores
-    public Reuniones() {
-    }
+	// Constructores
+	public Reuniones() {
+		
+	}
+	
+	public Reuniones(String estado, String titulo, String asunto, String aula, Integer idAlumno, Integer idProfesor,
+			LocalDateTime fechaHora, Integer idCentro) {
 
-    // Getters y Setters
-    public Integer getIdReunion() {
-        return idReunion;
-    }
+		this.estado = estado;
+		this.titulo = titulo;
+		this.asunto = asunto;
+		this.aula = aula;
+		this.fecha = fechaHora;
+		this.idCentro = String.valueOf(idCentro);
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
 
-    public void setIdReunion(Integer idReunion) {
-        this.idReunion = idReunion;
-    }
+		Users profesor = new Users();
+		profesor.setId(idProfesor);
+		this.profesor = profesor;
 
-    public String getEstado() {
-        return estado;
-    }
+		Users alumno = new Users();
+		alumno.setId(idAlumno);
+		this.alumno = alumno;
+	}
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+	// Getters y Setters
+	public Integer getIdReunion() {
+		return idReunion;
+	}
 
-    public String getEstadoEus() {
-        return estadoEus;
-    }
+	public void setIdReunion(Integer idReunion) {
+		this.idReunion = idReunion;
+	}
 
-    public void setEstadoEus(String estadoEus) {
-        this.estadoEus = estadoEus;
-    }
+	public String getEstado() {
+		return estado;
+	}
 
-    public String getIdCentro() {
-        return idCentro;
-    }
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
 
-    public void setIdCentro(String idCentro) {
-        this.idCentro = idCentro;
-    }
+	public String getEstadoEus() {
+		return estadoEus;
+	}
 
-    public String getTitulo() {
-        return titulo;
-    }
+	public void setEstadoEus(String estadoEus) {
+		this.estadoEus = estadoEus;
+	}
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+	public String getIdCentro() {
+		return idCentro;
+	}
 
-    public String getAsunto() {
-        return asunto;
-    }
+	public void setIdCentro(String idCentro) {
+		this.idCentro = idCentro;
+	}
 
-    public void setAsunto(String asunto) {
-        this.asunto = asunto;
-    }
+	public String getTitulo() {
+		return titulo;
+	}
 
-    public String getAula() {
-        return aula;
-    }
+	public void setTitulo(String titulo) {
+		this.titulo = titulo;
+	}
 
-    public void setAula(String aula) {
-        this.aula = aula;
-    }
+	public String getAsunto() {
+		return asunto;
+	}
 
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
+	public void setAsunto(String asunto) {
+		this.asunto = asunto;
+	}
 
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
+	public String getAula() {
+		return aula;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public void setAula(String aula) {
+		this.aula = aula;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public LocalDateTime getFecha() {
+		return fecha;
+	}
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+	public void setFecha(LocalDateTime fecha) {
+		this.fecha = fecha;
+	}
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public Users getProfesores() {
-        return profesor;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public void setProfesores(Users profesor) {
-        this.profesor = profesor;
-    }
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
 
-    public Users getAlumnos() {
-        return alumno;
-    }
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 
-    public void setAlumnos(Users alumno) {
-        this.alumno = alumno;
-    }
+	public Users getProfesores() {
+		return profesor;
+	}
+
+	public void setProfesores(Users profesor) {
+		this.profesor = profesor;
+	}
+
+	public Users getAlumnos() {
+		return alumno;
+	}
+
+	public void setAlumnos(Users alumno) {
+		this.alumno = alumno;
+	}
 
 }

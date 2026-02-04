@@ -1,15 +1,22 @@
 package elorServ.restApi.serviceRest;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-import java.sql.Date;
+import java.util.UUID;
 
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import elorServ.modelo.entities.Users;
-import elorServ.modelo.exception.ElorException;
 import elorServ.restApi.dto.AlumnoTablaDto;
 import elorServ.restApi.dto.PerfilAlumnoDto;
 import elorServ.restApi.dto.ProfesorTablaDto;
@@ -17,19 +24,25 @@ import elorServ.restApi.repositoryRest.UsersRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import java.sql.Date;
-import java.nio.file.*;
-import java.util.UUID;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
 @Transactional
-public class UsersService {
+public class UsersService implements InterfaceService<Users>{
 	
 	 @Autowired
 	    private UsersRepository usersRepository;
 
+	    @Autowired
+	    private SessionFactory session; 
+
+	    @Autowired
+	    private EmailService emailService; 
+	    
+	    @Autowired
+	    private BCryptPasswordEncoder passwordEncoder;
+	    
+	 @Override
 	public List<Users> findAll() {
 		return usersRepository.findAll();
 	}
@@ -43,53 +56,33 @@ public class UsersService {
 		return null;
 	}
 
+	@Override
 	public Users save(Users username) {
         return usersRepository.save(username);
 	}
 
+	@Override
 	public Users actualizar(Long id, Users username) {
-		//quitar:
 		return username;
-//		return usuarioRepository.findById(id)
-//	            .map(usuario -> {
-//	                // Actualizar campos
-//	                usuario.setNombre(usuarioActualizado.getNombre().trim());
-//	                
-//	                // Solo actualizar email si cambió y no existe
-//	                if (!usuario.getEmail().equals(usuarioActualizado.getEmail())) {
-//	                    if (usuarioRepository.existsByEmail(usuarioActualizado.getEmail())) {
-//	                        throw new IllegalArgumentException("El email ya está en uso");
-//	                    }
-//	                    usuario.setEmail(usuarioActualizado.getEmail().toLowerCase().trim());
-//	                }
-//	                
-//	                // Actualizar password si se proporcionó
-//	                if (usuarioActualizado.getPassword() != null && 
-//	                    !usuarioActualizado.getPassword().isEmpty()) {
-//	                    usuario.setPassword(usuarioActualizado.getPassword());
-//	                }
-//	                
-//	                if (usuarioActualizado.getActivo() != null) {
-//	                    usuario.setActivo(usuarioActualizado.getActivo());
-//	                }
-//	                
-//	                return usuarioRepository.save(usuario);
-//	            })
-//	            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + id));
-//	   
 	}
 
+	@Override
 	public void deleteById(Long id) {
-		// TODO Auto-generated method stub
+		 usersRepository.deleteById(id);
 
 	}
 
-	public Optional<Users> autenticar(String username, String password) {
-		 // TODO: En producción, comparar con BCrypt
-        return usersRepository.findByUsernameAndPassword(
-        		username.toLowerCase().trim(), 
-            password
-        );
+//	public Optional<Users> autenticar(String username, String password) {
+//		 // TODO: En producción, comparar con BCrypt
+//        return usersRepository.findByUsernameAndPassword(
+//        		username.toLowerCase().trim(), 
+//            password
+//        );
+//	}
+	public Optional<Users> autenticar(String identifier, String password) {
+	    return usersRepository.findByUsername(identifier)
+	            .or(() -> usersRepository.findByEmail(identifier))
+	            .filter(user -> passwordEncoder.matches(password, user.getPassword()));
 	}
 
 	public boolean existeEmail(String email) {
@@ -239,5 +232,7 @@ public class UsersService {
 	    u.setArgazkiaUrl(urlPublica);
 	    return usersRepository.save(u);
 	}
+	
+	
 	
 }

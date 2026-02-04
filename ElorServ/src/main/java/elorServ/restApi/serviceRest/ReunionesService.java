@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import elorServ.modelo.entities.Reuniones;
 import elorServ.restApi.dto.ReunionListaDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -15,10 +16,34 @@ import jakarta.persistence.Query;
 
 @Service
 @Transactional
-public class ReunionesService {
+public class ReunionesService implements InterfaceService<Reuniones> {
 
     @PersistenceContext
     private EntityManager em;
+
+    @Override
+    public Reuniones save(Reuniones t) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Reuniones> findAll() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Reuniones actualizar(Long id, Reuniones t) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        // TODO Auto-generated method stub
+        
+    }
 
     public List<ReunionListaDto> obtenerReunionesUsuario(Integer userId) {
         String sql = """
