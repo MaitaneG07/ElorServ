@@ -14,6 +14,7 @@ public class UsersDao extends GenericDao<Users>{
     public UsersDao() {
         super(Users.class);
     }
+    
 
     /**
      * Obtiene alumnos de un profesor con filtros opcionales de ciclo y curso

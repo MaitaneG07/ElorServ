@@ -26,6 +26,7 @@ public class Message {
 	private String aula;
 	private Integer idAlumnoSeleccionado;
 	private LocalDateTime fechaHora;
+	private String email;
 
 	public Message() {
 	}
@@ -161,6 +162,7 @@ public class Message {
 		msg.idProfesor = idProfesor;
 		return msg;
 	}
+	
 
 	/**
 	 * Constructor para respuestas con objeto Users
