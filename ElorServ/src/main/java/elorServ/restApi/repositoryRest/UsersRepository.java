@@ -12,6 +12,8 @@ import elorServ.modelo.entities.Users;
 public interface UsersRepository extends JpaRepository<Users, Long> {
     
     // Spring Data JPA genera automáticamente la implementación
+	
+	
     
     // Buscar por email
     Optional<Users> findByEmail(String email);
@@ -25,6 +27,9 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     
     // Buscar por email y password (para login)
     Optional<Users> findByUsernameAndPassword(String username, String password);
+
+    
+    Optional<Users> findByUsername(String username);
     
  
 }
