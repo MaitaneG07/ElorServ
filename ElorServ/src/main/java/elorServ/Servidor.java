@@ -314,7 +314,7 @@ public class Servidor {
 			try {
 		        String password = CryptoUtil.desencriptar(passwordEncriptada);
 
-				if (passwordEncriptada == null) {
+				if (password == null) {
 					respuesta = Message.crearRespuesta("LOGIN_RESPONSE", "ERROR", "Error al procesar credenciales");
 					String respuestaJson = gson.toJson(respuesta);
 					salida.println(respuestaJson);
@@ -330,7 +330,7 @@ public class Servidor {
 				Users usuarioEncontrado = null;
 
 				for (Users user : usuarios) {
-					if (user.getUsername().equals(usuario) && user.getPassword().equals(passwordEncriptada)) {
+					if (user.getUsername().equals(usuario) && user.getPassword().equals(password)) {
 						if ((user).getTipos().getId() == 3) {
 							encontrado = true;
 							usuarioEncontrado = user;
